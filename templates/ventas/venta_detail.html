@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Detalle de Venta{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3">Detalle de Venta</h1>
+        <div>
+            <a href="{% url 'ventas:venta_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+            <a href="{% url 'ventas:venta_update' venta.pk %}" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Editar
+            </a>
+        </div>
+    </div>
+
+    <!-- Información general -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Información General</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <p class="mb-2"><strong>Código:</strong> {{ venta.codigo }}</p>
+                </div>
+                <div class="col-md-3">
+                    <p class="mb-2"><strong>Fecha:</strong> {{ venta.fecha_venta|date:"d/m/Y H:i" }}</p>
+                </div>
+                <div class="col-md-3">
+                    <p class="mb-2">
+                        <strong>Estado:</strong>
+                        <span class="badge bg-{% if venta.estado == 'COMPLETADA' %}success{% elif venta.estado == 'PENDIENTE' %}warning{% else %}danger{% endif %}">
+                            {{ venta.get_estado_display }}
+                        </span>
+                    </p>
+                </div>
+                <div class="col-md-3">
+                    <p class="mb-2"><strong>Cliente:</strong> {{ venta.cliente.nombre }}</p>
+                </div>
+            </div>
+            {% if venta.notas %}
+            <div class="row mt-3">
+                <div class="col-12">
+                    <p class="mb-2"><strong>Notas:</strong></p>
+                    <p class="mb-0">{{ venta.notas }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Detalles de Productos -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Productos</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Lote</th>
+                            <th>Cantidad</th>
+                            <th>Precio Unitario</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for detalle in venta.detalles_productos.all %}
+                        <tr>
+                            <td>{{ detalle.producto.nombre }}</td>
+                            <td>{{ detalle.lote.codigo|default:"-" }}</td>
+                            <td>{{ detalle.cantidad|intcomma }}</td>
+                            <td>${{ detalle.precio_unitario|intcomma }}</td>
+                            <td>${{ detalle.subtotal|intcomma }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">No hay productos en esta venta</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detalles de Mercancías -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Mercancías</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Mercancía</th>
+                            <th>Lote</th>
+                            <th>Cantidad</th>
+                            <th>Precio Unitario</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for detalle in venta.detalles_mercancias.all %}
+                        <tr>
+                            <td>{{ detalle.mercancia.nombre }}</td>
+                            <td>{{ detalle.lote.codigo|default:"-" }}</td>
+                            <td>{{ detalle.cantidad|intcomma }}</td>
+                            <td>${{ detalle.precio_unitario|intcomma }}</td>
+                            <td>${{ detalle.subtotal|intcomma }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">No hay mercancías en esta venta</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Totales -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="row justify-content-end">
+                <div class="col-md-4">
+                    <table class="table table-borderless">
+                        <tr>
+                            <th>Subtotal:</th>
+                            <td class="text-end">${{ venta.subtotal|intcomma }}</td>
+                        </tr>
+                        <tr>
+                            <th>Impuestos:</th>
+                            <td class="text-end">${{ venta.impuestos|intcomma }}</td>
+                        </tr>
+                        <tr class="table-primary">
+                            <th>Total:</th>
+                            <td class="text-end"><strong>${{ venta.total|intcomma }}</strong></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Metadatos -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Información Adicional</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <p class="mb-2"><strong>Creada por:</strong> {{ venta.creado_por.get_full_name|default:venta.creado_por.username }}</p>
+                </div>
+                <div class="col-md-4">
+                    <p class="mb-2"><strong>Fecha de creación:</strong> {{ venta.fecha_creacion|date:"d/m/Y H:i" }}</p>
+                </div>
+                <div class="col-md-4">
+                    <p class="mb-2"><strong>Última actualización:</strong> {{ venta.fecha_actualizacion|date:"d/m/Y H:i" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,330 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mercancías - Gestión de Acopio{% endblock %}
+
+{% block extra_css %}
+<style>
+    .mercancia-card {
+        transition: all 0.3s ease;
+        border-left: 4px solid #3b82f6;
+        height: 100%;
+    }
+    
+    .mercancia-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .stat-card h3 {
+        font-size: 2rem;
+        font-weight: bold;
+        margin: 0;
+    }
+
+    .stat-card p {
+        margin: 5px 0 0 0;
+        opacity: 0.9;
+    }
+
+    .stock-badge {
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .stock-sin { background-color: #fee2e2; color: #991b1b; }
+    .stock-bajo { background-color: #fef3c7; color: #92400e; }
+    .stock-normal { background-color: #d1fae5; color: #065f46; }
+
+    .filter-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="page-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="mb-2">
+                    <i class="fas fa-boxes"></i> Gestión de Mercancías
+                </h1>
+                <p class="mb-0 opacity-90">Control y administración del inventario de mercancías</p>
+            </div>
+            <a href="{% url 'mercancia:crear' %}" class="btn btn-light btn-lg">
+                <i class="fas fa-plus"></i> Nueva Mercancía
+            </a>
+            <div class="btn-group ms-2" role="group">
+                <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="fas fa-cog"></i> Gestión
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{% url 'mercancia:categorias' %}">
+                        <i class="fas fa-tags"></i> Categorías
+                    </a></li>
+                    <li><a class="dropdown-item" href="{% url 'mercancia:proveedores' %}">
+                        <i class="fas fa-truck"></i> Proveedores
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{% url 'mercancia:lotes' %}">
+                        <i class="fas fa-boxes"></i> Lotes
+                    </a></li>
+                    <li><a class="dropdown-item" href="{% url 'mercancia:movimientos' %}">
+                        <i class="fas fa-exchange-alt"></i> Movimientos
+                    </a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <h3>{{ stats.total }}</h3>
+                <p><i class="fas fa-boxes"></i> Total Mercancías</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <h3>{{ stats.activas }}</h3>
+                <p><i class="fas fa-check-circle"></i> Activas</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <h3>{{ stats.sin_stock }}</h3>
+                <p><i class="fas fa-exclamation-triangle"></i> Sin Stock</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <h3>${{ stats.valor_total|floatformat:2 }}</h3>
+                <p><i class="fas fa-dollar-sign"></i> Valor Inventario</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filter-card">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label"><i class="fas fa-search"></i> Buscar</label>
+                <input type="text" name="buscar" class="form-control" 
+                       placeholder="Código o nombre..." value="{{ request.GET.buscar }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label"><i class="fas fa-folder"></i> Categoría</label>
+                <select name="categoria" class="form-select">
+                    <option value="">Todas las categorías</option>
+                    {% for cat in categorias %}
+                    <option value="{{ cat.id }}" {% if request.GET.categoria == cat.id|stringformat:"s" %}selected{% endif %}>
+                        {{ cat.nombre }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label"><i class="fas fa-check-circle"></i> Estado</label>
+                <select name="estado" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="activo" {% if request.GET.estado == 'activo' %}selected{% endif %}>Activos</option>
+                    <option value="inactivo" {% if request.GET.estado == 'inactivo' %}selected{% endif %}>Inactivos</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label"><i class="fas fa-warehouse"></i> Stock</label>
+                <select name="stock" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="sin_stock" {% if request.GET.stock == 'sin_stock' %}selected{% endif %}>Sin Stock</option>
+                    <option value="con_stock" {% if request.GET.stock == 'con_stock' %}selected{% endif %}>Con Stock</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-filter"></i> Filtrar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Lista de Mercancías -->
+    <div class="row">
+        {% for mercancia in mercancias %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card mercancia-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h5 class="card-title mb-0">
+                            <a href="{% url 'mercancia:detalle' mercancia.pk %}" 
+                               class="text-decoration-none text-dark">
+                                {{ mercancia.nombre }}
+                            </a>
+                        </h5>
+                        {% if mercancia.activo %}
+                        <span class="badge bg-success">Activo</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Inactivo</span>
+                        {% endif %}
+                    </div>
+
+                    <p class="text-muted mb-2">
+                        <i class="fas fa-barcode"></i> <strong>Código:</strong> {{ mercancia.codigo }}
+                    </p>
+
+                    <p class="text-muted mb-2">
+                        <i class="fas fa-folder"></i> <strong>Categoría:</strong> {{ mercancia.categoria.nombre }}
+                    </p>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span><i class="fas fa-warehouse"></i> Stock Actual:</span>
+                            <strong>{{ mercancia.stock_actual|floatformat:2 }}</strong>
+                        </div>
+                        {% if mercancia.stock_actual == 0 %}
+                        <span class="stock-badge stock-sin">Sin Stock</span>
+                        {% else %}
+                        <span class="stock-badge stock-normal">En Stock</span>
+                        {% endif %}
+                    </div>
+
+                    {% if mercancia.precio_venta %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span><i class="fas fa-dollar-sign"></i> Precio Venta:</span>
+                            <strong class="text-success">${{ mercancia.precio_venta|floatformat:2 }}</strong>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if mercancia.valor_inventario %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span><i class="fas fa-coins"></i> Valor Inventario:</span>
+                            <strong class="text-primary">${{ mercancia.valor_inventario|floatformat:2 }}</strong>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex gap-2 mt-3">
+                        <a href="{% url 'mercancia:detalle' mercancia.pk %}" 
+                           class="btn btn-sm btn-outline-primary flex-fill">
+                            <i class="fas fa-eye"></i> Ver
+                        </a>
+                        <a href="{% url 'mercancia:editar' mercancia.pk %}" 
+                           class="btn btn-sm btn-outline-warning flex-fill">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info text-center">
+                <i class="fas fa-info-circle fa-2x mb-3"></i>
+                <h5>No se encontraron mercancías</h5>
+                <p>No hay mercancías registradas o que coincidan con los filtros aplicados.</p>
+                <a href="{% url 'mercancia:crear' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Crear Primera Mercancía
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Paginación -->
+    {% if mercancias.has_other_pages %}
+    <nav aria-label="Paginación">
+        <ul class="pagination justify-content-center">
+            {% if mercancias.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{% if request.GET.buscar %}&buscar={{ request.GET.buscar }}{% endif %}">
+                    Primera
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ mercancias.previous_page_number }}{% if request.GET.buscar %}&buscar={{ request.GET.buscar }}{% endif %}">
+                    Anterior
+                </a>
+            </li>
+            {% endif %}
+
+            <li class="page-item active">
+                <span class="page-link">
+                    Página {{ mercancias.number }} de {{ mercancias.paginator.num_pages }}
+                </span>
+            </li>
+
+            {% if mercancias.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ mercancias.next_page_number }}{% if request.GET.buscar %}&buscar={{ request.GET.buscar }}{% endif %}">
+                    Siguiente
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ mercancias.paginator.num_pages }}{% if request.GET.buscar %}&buscar={{ request.GET.buscar }}{% endif %}">
+                    Última
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    <!-- Accesos Rápidos -->
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <a href="{% url 'mercancia:lotes' %}" class="card text-decoration-none border-primary">
+                <div class="card-body text-center">
+                    <i class="fas fa-layer-group fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Gestión de Lotes</h5>
+                    <p class="text-muted">Control de lotes y vencimientos</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{% url 'mercancia:movimientos' %}" class="card text-decoration-none border-success">
+                <div class="card-body text-center">
+                    <i class="fas fa-exchange-alt fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">Movimientos</h5>
+                    <p class="text-muted">Historial de entradas y salidas</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{% url 'mercancia:categorias' %}" class="card text-decoration-none border-info">
+                <div class="card-body text-center">
+                    <i class="fas fa-folder fa-3x text-info mb-3"></i>
+                    <h5 class="card-title">Categorías</h5>
+                    <p class="text-muted">Organizar por categorías</p>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

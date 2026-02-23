@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Crear Lote de Producto{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-section {
+        background: white;
+        border-radius: 10px;
+        padding: 25px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+    }
+
+    .form-section h5 {
+        color: #667eea;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+    }
+
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="page-header">
+        <h1 class="mb-2">
+            <i class="fas fa-plus"></i> Nuevo Lote de Producto
+        </h1>
+        <p class="mb-0 opacity-90">Registrar nuevo lote de producto con control de vencimiento</p>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- Información del Lote -->
+        <div class="form-section">
+            <h5><i class="fas fa-layer-group"></i> Información del Lote</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="id_producto" class="form-label required-field">Producto</label>
+                        {{ form.producto }}
+                        {% if form.producto.errors %}
+                        <div class="text-danger small">{{ form.producto.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="id_numero_lote" class="form-label required-field">Número de Lote</label>
+                        {{ form.numero_lote }}
+                        {% if form.numero_lote.errors %}
+                        <div class="text-danger small">{{ form.numero_lote.errors }}</div>
+                        {% endif %}
+                        <small class="form-text text-muted">Número único de identificación del lote</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="id_fecha_produccion" class="form-label required-field">Fecha de Producción</label>
+                        {{ form.fecha_produccion }}
+                        {% if form.fecha_produccion.errors %}
+                        <div class="text-danger small">{{ form.fecha_produccion.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="id_fecha_vencimiento" class="form-label">Fecha de Vencimiento</label>
+                        {{ form.fecha_vencimiento }}
+                        {% if form.fecha_vencimiento.errors %}
+                        <div class="text-danger small">{{ form.fecha_vencimiento.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="id_proveedor" class="form-label">Proveedor</label>
+                        {{ form.proveedor }}
+                        {% if form.proveedor.errors %}
+                        <div class="text-danger small">{{ form.proveedor.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cantidades y Costos -->
+        <div class="form-section">
+            <h5><i class="fas fa-boxes"></i> Cantidades y Costos</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="id_cantidad_inicial" class="form-label required-field">Cantidad Inicial</label>
+                        {{ form.cantidad_inicial }}
+                        {% if form.cantidad_inicial.errors %}
+                        <div class="text-danger small">{{ form.cantidad_inicial.errors }}</div>
+                        {% endif %}
+                        <small class="form-text text-muted">Cantidad total recibida en este lote</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="id_costo_unitario" class="form-label">Costo Unitario</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            {{ form.costo_unitario }}
+                        </div>
+                        {% if form.costo_unitario.errors %}
+                        <div class="text-danger small">{{ form.costo_unitario.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control de Calidad -->
+        <div class="form-section">
+            <h5><i class="fas fa-check-circle"></i> Control de Calidad</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="id_estado_calidad" class="form-label">Estado de Calidad</label>
+                        {{ form.estado_calidad }}
+                        {% if form.estado_calidad.errors %}
+                        <div class="text-danger small">{{ form.estado_calidad.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="id_observaciones" class="form-label">Observaciones</label>
+                        {{ form.observaciones }}
+                        {% if form.observaciones.errors %}
+                        <div class="text-danger small">{{ form.observaciones.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-check mb-3">
+                {{ form.activo }}
+                <label class="form-check-label" for="id_activo">
+                    Lote Activo
+                </label>
+            </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="d-flex gap-2 justify-content-end">
+            <a href="{% url 'productos:lotes' %}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancelar
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Guardar Lote
+            </button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Calcular automáticamente fecha de vencimiento basada en días de vida útil
+    const productoSelect = document.getElementById('id_producto');
+    const fechaProduccion = document.getElementById('id_fecha_produccion');
+    const fechaVencimiento = document.getElementById('id_fecha_vencimiento');
+
+    fechaProduccion.addEventListener('change', function() {
+        if (productoSelect.value && this.value) {
+            // En producción, obtener días de vida útil del producto vía AJAX
+            console.log('Calcular fecha de vencimiento basada en días de vida útil');
+        }
+    });
+
+    // Auto-generar número de lote
+    function generarNumeroLote() {
+        const fecha = new Date();
+        const year = fecha.getFullYear().toString().slice(-2);
+        const month = ('0' + (fecha.getMonth() + 1)).toString().slice(-2);
+        const random = Math.floor(1000 + Math.random() * 9000);
+        return `L${year}${month}${random}`;
+    }
+
+    const numeroLoteInput = document.getElementById('id_numero_lote');
+    if (!numeroLoteInput.value) {
+        numeroLoteInput.value = generarNumeroLote();
+    }
+</script>
+{% endblock %}

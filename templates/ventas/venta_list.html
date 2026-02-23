@@ -1,0 +1,141 @@
+{% extends 'base.html' %} 
+{% load static %} 
+{% load humanize %} 
+{% block title%}Ventas{% endblock %} 
+{% block content %}
+<div class="container-fluid">
+  <h1 class="h3 mb-4">Ventas</h1>
+
+  <!-- Búsqueda y botón de nueva venta -->
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <form class="d-flex" method="GET">
+        <input
+          class="form-control me-2"
+          type="search"
+          placeholder="Buscar por código o cliente"
+          name="q"
+          value="{{ request.GET.q }}"
+        />
+        <button class="btn btn-outline-primary" type="submit">Buscar</button>
+      </form>
+    </div>
+    <div class="col-md-6 text-md-end">
+      <a href="{% url 'ventas:venta_create' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Nueva Venta
+      </a>
+    </div>
+  </div>
+
+  <!-- Tabla de ventas -->
+  <div class="card shadow mb-4">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Fecha</th>
+              <th>Cliente</th>
+              <th>Total</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for venta in ventas %}
+            <tr>
+              <td>{{ venta.codigo }}</td>
+              <td>{{ venta.fecha_venta|date:"d/m/Y H:i" }}</td>
+              <td>{{ venta.cliente.nombre }}</td>
+              <td>${{ venta.total|intcomma }}</td>
+              <td>
+                <span
+                  class="badge bg-{% if venta.estado == 'COMPLETADA' %}success{% elif venta.estado == 'PENDIENTE' %}warning{% else %}danger{% endif %}"
+                >
+                  {{ venta.get_estado_display }}
+                </span>
+              </td>
+              <td>
+                <a
+                  href="{% url 'ventas:venta_detail' venta.pk %}"
+                  class="btn btn-sm btn-info"
+                  title="Ver detalle"
+                >
+                  <i class="fas fa-eye"></i>
+                </a>
+                <a
+                  href="{% url 'ventas:venta_update' venta.pk %}"
+                  class="btn btn-sm btn-primary"
+                  title="Editar"
+                >
+                  <i class="fas fa-edit"></i>
+                </a>
+                <a
+                  href="{% url 'ventas:venta_delete' venta.pk %}"
+                  class="btn btn-sm btn-danger"
+                  title="Eliminar"
+                >
+                  <i class="fas fa-trash"></i>
+                </a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6" class="text-center">No hay ventas registradas</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      {% if is_paginated %}
+      <nav aria-label="Paginación" class="mt-4">
+        <ul class="pagination justify-content-center">
+          {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a
+              class="page-link"
+              href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+              >&laquo; Primera</a
+            >
+          </li>
+          <li class="page-item">
+            <a
+              class="page-link"
+              href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+              >Anterior</a
+            >
+          </li>
+          {% endif %}
+
+          <li class="page-item active">
+            <span class="page-link">
+              Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+            </span>
+          </li>
+
+          {% if page_obj.has_next %}
+          <li class="page-item">
+            <a
+              class="page-link"
+              href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+              >Siguiente</a
+            >
+          </li>
+          <li class="page-item">
+            <a
+              class="page-link"
+              href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+              >Última &raquo;</a
+            >
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

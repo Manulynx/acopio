@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestión de Inmuebles{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="fas fa-building"></i> Gestión de Inmuebles</h2>
+                <div>
+                    <a href="{% url 'inmuebles:tipos_index' %}" class="btn btn-outline-primary me-2">
+                        <i class="fas fa-list"></i> Tipos de Inmuebles
+                    </a>
+                    <a href="{% url 'inmuebles:crear' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Nuevo Inmueble
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-building"></i> Total Inmuebles</h5>
+                    <h2>{{ total_inmuebles }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-check-circle"></i> Disponibles</h5>
+                    <h2>{{ inmuebles_disponibles }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-key"></i> Arrendados</h5>
+                    <h2>{{ inmuebles_arrendados }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros de búsqueda -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-filter"></i> Filtros de Búsqueda</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    {{ form.buscar }}
+                </div>
+                <div class="col-md-2">
+                    {{ form.tipo }}
+                </div>
+                <div class="col-md-2">
+                    {{ form.estado }}
+                </div>
+                <div class="col-md-2">
+                    {{ form.ciudad }}
+                </div>
+                <div class="col-md-3">
+                    <div class="row">
+                        <div class="col-6">
+                            {{ form.precio_min }}
+                        </div>
+                        <div class="col-6">
+                            {{ form.precio_max }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Buscar
+                    </button>
+                    <a href="{% url 'inmuebles:index' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Limpiar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de inmuebles -->
+    <div class="row">
+        {% for inmueble in page_obj %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 {% if not inmueble.activo %}opacity-50{% endif %}">
+                {% if inmueble.imagen_principal %}
+                <img src="{{ inmueble.imagen_principal.imagen.url }}" class="card-img-top" alt="{{ inmueble.nombre }}" style="height: 200px; object-fit: cover;">
+                {% else %}
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                    <i class="fas fa-building fa-4x text-muted"></i>
+                </div>
+                {% endif %}
+                
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title mb-0">{{ inmueble.nombre }}</h5>
+                        {% if inmueble.destacado %}
+                        <span class="badge bg-warning text-dark"><i class="fas fa-star"></i> Destacado</span>
+                        {% endif %}
+                    </div>
+                    
+                    <p class="text-muted mb-2">
+                        <small><i class="fas fa-code"></i> {{ inmueble.codigo }}</small>
+                    </p>
+                    
+                    <p class="card-text">
+                        <i class="fas fa-map-marker-alt"></i> {{ inmueble.direccion }}<br>
+                        <i class="fas fa-city"></i> {{ inmueble.ciudad }}, {{ inmueble.departamento }}
+                    </p>
+                    
+                    <div class="mb-2">
+                        <span class="badge bg-{{ inmueble.estado|lower }}">
+                            {{ inmueble.get_estado_display }}
+                        </span>
+                        <span class="badge bg-info">{{ inmueble.tipo.nombre }}</span>
+                    </div>
+                    
+                    <p class="mb-2">
+                        <strong><i class="fas fa-expand-arrows-alt"></i> Área:</strong> {{ inmueble.area_total }} m²<br>
+                        <strong><i class="fas fa-dollar-sign"></i> Arriendo:</strong> ${{ inmueble.precio_arriendo_mensual|floatformat:0 }}
+                    </p>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'inmuebles:detalle' inmueble.pk %}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye"></i> Ver Detalles
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> No se encontraron inmuebles.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Paginación -->
+    {% if page_obj.has_other_pages %}
+    <nav aria-label="Paginación">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1">Primera</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+            </li>
+            {% endif %}
+            
+            <li class="page-item active">
+                <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+            </li>
+            
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Última</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
+<style>
+.bg-disponible { background-color: #28a745 !important; }
+.bg-arrendado { background-color: #17a2b8 !important; }
+.bg-mantenimiento { background-color: #ffc107 !important; color: #000 !important; }
+.bg-no_disponible { background-color: #6c757d !important; }
+</style>
+{% endblock %}

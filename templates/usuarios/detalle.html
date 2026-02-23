@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - UEB Acopio Bayamo{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2>{{ title }}</h2>
+                    <p class="text-muted">Información detallada del usuario</p>
+                </div>
+                <div class="btn-group" role="group">
+                    {% if can_edit %}
+                    <a href="{% url 'usuarios:editar' usuario.pk %}" class="btn btn-primary">
+                        <i class="fas fa-edit"></i> Editar
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'usuarios:index' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </a>
+                </div>
+            </div>
+
+            <!-- Información del usuario -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Avatar y estado -->
+                        <div class="col-md-3 text-center">
+                            <div class="mb-3">
+                                <div style="width: 100px; height: 100px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; color: white; font-size: 2rem; font-weight: bold;">
+                                    {{ usuario.username|first|upper }}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                {% if usuario.is_active %}
+                                    <span class="badge bg-success fs-6">Usuario Activo</span>
+                                {% else %}
+                                    <span class="badge bg-danger fs-6">Usuario Inactivo</span>
+                                {% endif %}
+                            </div>
+                            
+                            {% if usuario.is_staff or usuario.is_superuser %}
+                            <div class="mb-3">
+                                {% if usuario.is_superuser %}
+                                    <span class="badge bg-danger mb-1">Superusuario</span><br>
+                                {% endif %}
+                                {% if usuario.is_staff %}
+                                    <span class="badge bg-warning text-dark">Staff</span>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Información personal -->
+                        <div class="col-md-9">
+                            <h5 class="border-bottom pb-2 mb-3">Información Personal</h5>
+                            
+                            <div class="row mb-3">
+                                <div class="col-sm-4">
+                                    <strong>Nombre de usuario:</strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    {{ usuario.username }}
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-4">
+                                    <strong>Nombre completo:</strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    {{ usuario.get_full_name|default:"<em>No especificado</em>" }}
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-4">
+                                    <strong>Correo electrónico:</strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    {% if usuario.email %}
+                                        <a href="mailto:{{ usuario.email }}">{{ usuario.email }}</a>
+                                    {% else %}
+                                        <em>No especificado</em>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <h5 class="border-bottom pb-2 mb-3 mt-4">Información del Sistema</h5>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-4">
+                                    <strong>Fecha de registro:</strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    {{ usuario.date_joined|date:"d/m/Y H:i" }}
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-4">
+                                    <strong>Último acceso:</strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    {% if usuario.last_login %}
+                                        {{ usuario.last_login|date:"d/m/Y H:i" }}
+                                    {% else %}
+                                        <em>Nunca ha iniciado sesión</em>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-4">
+                                    <strong>ID de usuario:</strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    #{{ usuario.pk }}
+                                </div>
+                            </div>
+
+                            {% if request.user.is_staff or request.user.is_superuser %}
+                            <h5 class="border-bottom pb-2 mb-3 mt-4">Permisos y Roles</h5>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-4">
+                                    <strong>Puede acceder al admin:</strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    {% if usuario.is_staff %}
+                                        <span class="text-success"><i class="fas fa-check"></i> Sí</span>
+                                    {% else %}
+                                        <span class="text-danger"><i class="fas fa-times"></i> No</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-4">
+                                    <strong>Es superusuario:</strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    {% if usuario.is_superuser %}
+                                        <span class="text-success"><i class="fas fa-check"></i> Sí</span>
+                                    {% else %}
+                                        <span class="text-danger"><i class="fas fa-times"></i> No</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acciones adicionales -->
+            {% if can_edit or can_delete %}
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Acciones</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex gap-2 flex-wrap">
+                        {% if can_edit %}
+                        <a href="{% url 'usuarios:editar' usuario.pk %}" class="btn btn-primary">
+                            <i class="fas fa-edit"></i> Editar Usuario
+                        </a>
+                        
+                        {% if request.user == usuario %}
+                        <a href="{% url 'usuarios:cambiar_password' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-key"></i> Cambiar Contraseña
+                        </a>
+                        {% endif %}
+                        {% endif %}
+
+                        {% if can_delete %}
+                        <a href="{% url 'usuarios:eliminar' usuario.pk %}" 
+                           class="btn btn-outline-danger"
+                           onclick="return confirm('¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer.')">
+                            <i class="fas fa-trash"></i> Eliminar Usuario
+                        </a>
+                        {% endif %}
+
+                        {% if request.user.is_superuser and request.user != usuario %}
+                        <button type="button" 
+                                class="btn {% if usuario.is_active %}btn-outline-warning{% else %}btn-outline-success{% endif %}"
+                                onclick="toggleUserStatus({{ usuario.pk }}, '{{ usuario.username }}')">
+                            {% if usuario.is_active %}
+                                <i class="fas fa-pause"></i> Desactivar Usuario
+                            {% else %}
+                                <i class="fas fa-play"></i> Activar Usuario
+                            {% endif %}
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<script src="{% static 'js/usuarios.js' %}"></script>
+{% endblock %}

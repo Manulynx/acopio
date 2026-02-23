@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Movimientos de Inventario{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .option-card {
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+        height: 100%;
+        cursor: pointer;
+    }
+
+    .option-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        border-color: #667eea;
+    }
+
+    .option-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="page-header">
+        <h1 class="mb-3">
+            <i class="fas fa-exchange-alt"></i> Movimientos de Inventario
+        </h1>
+        <p class="mb-0 fs-5">
+            Sistema integral de control de entradas y salidas
+        </p>
+    </div>
+
+    <!-- Información -->
+    <div class="alert alert-info mb-4">
+        <h5><i class="fas fa-info-circle"></i> Gestión de Movimientos</h5>
+        <p class="mb-0">
+            Los movimientos de inventario ahora se gestionan de manera integrada en el módulo de <strong>Mercancías</strong>.
+            Seleccione una de las siguientes opciones para continuar:
+        </p>
+    </div>
+
+    <!-- Opciones -->
+    <div class="row g-4">
+        <div class="col-md-4">
+            <a href="{% url 'mercancia:movimientos' %}" class="text-decoration-none">
+                <div class="card option-card">
+                    <div class="card-body text-center p-4">
+                        <div class="option-icon">
+                            <i class="fas fa-list"></i>
+                        </div>
+                        <h4 class="card-title mb-3">Ver Todos los Movimientos</h4>
+                        <p class="text-muted">
+                            Consulta el historial completo de entradas, salidas y ajustes de inventario
+                        </p>
+                        <div class="btn btn-outline-primary mt-3">
+                            <i class="fas fa-arrow-right"></i> Ir al Historial
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a href="{% url 'mercancia:movimiento_crear' %}" class="text-decoration-none">
+                <div class="card option-card">
+                    <div class="card-body text-center p-4">
+                        <div class="option-icon">
+                            <i class="fas fa-plus-circle"></i>
+                        </div>
+                        <h4 class="card-title mb-3">Registrar Movimiento</h4>
+                        <p class="text-muted">
+                            Registra entradas, salidas, ajustes, mermas o transferencias de stock
+                        </p>
+                        <div class="btn btn-outline-success mt-3">
+                            <i class="fas fa-plus"></i> Nuevo Movimiento
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a href="{% url 'mercancia:index' %}" class="text-decoration-none">
+                <div class="card option-card">
+                    <div class="card-body text-center p-4">
+                        <div class="option-icon">
+                            <i class="fas fa-boxes"></i>
+                        </div>
+                        <h4 class="card-title mb-3">Gestión de Mercancías</h4>
+                        <p class="text-muted">
+                            Administra el catálogo completo de mercancías y revisa stocks actuales
+                        </p>
+                        <div class="btn btn-outline-info mt-3">
+                            <i class="fas fa-warehouse"></i> Ir a Mercancías
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Accesos Adicionales -->
+    <div class="row g-4 mt-4">
+        <div class="col-md-6">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-arrow-down"></i> Entradas de Mercancía</h5>
+                </div>
+                <div class="card-body">
+                    <p>Registra las entradas de mercancía al almacén:</p>
+                    <ul>
+                        <li>Compras a proveedores</li>
+                        <li>Devoluciones de clientes</li>
+                        <li>Ajustes positivos de inventario</li>
+                        <li>Transferencias desde otros almacenes</li>
+                    </ul>
+                    <a href="{% url 'mercancia:movimiento_crear' %}" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Registrar Entrada
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="fas fa-arrow-up"></i> Salidas de Mercancía</h5>
+                </div>
+                <div class="card-body">
+                    <p>Registra las salidas de mercancía del almacén:</p>
+                    <ul>
+                        <li>Ventas a clientes</li>
+                        <li>Devoluciones a proveedores</li>
+                        <li>Ajustes negativos de inventario</li>
+                        <li>Mermas y vencimientos</li>
+                    </ul>
+                    <a href="{% url 'mercancia:movimiento_crear' %}" class="btn btn-danger">
+                        <i class="fas fa-minus"></i> Registrar Salida
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información del Sistema -->
+    <div class="card mt-4 border-info">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="fas fa-lightbulb"></i> Sistema Integrado</h5>
+        </div>
+        <div class="card-body">
+            <p class="mb-0">
+                <strong>Nota:</strong> El sistema de movimientos está completamente integrado con el módulo de Mercancías.
+                Todos los movimientos se registran automáticamente y actualizan el stock en tiempo real.
+                Los lotes y fechas de vencimiento también se controlan automáticamente.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

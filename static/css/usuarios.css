@@ -1,0 +1,161 @@
+/* =================================================================
+   UEB Acopio Bayamo - Estilos para Gestión de Usuarios
+   ================================================================= */
+
+/* Lista de usuarios */
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #667eea;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+}
+
+.status-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-active {
+    background-color: #d1edff;
+    color: #0969da;
+}
+
+.status-inactive {
+    background-color: #ffebe9;
+    color: #cf222e;
+}
+
+.btn-toggle-status {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
+/* Formulario de eliminación */
+.danger-zone {
+    border: 2px solid #dc3545;
+    border-radius: 0.5rem;
+    background-color: #f8d7da;
+}
+
+.user-info {
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
+
+/* Login page específicos */
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    background: #667eea;
+}
+
+.login-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    max-width: 900px;
+    width: 100%;
+}
+
+.login-left {
+    background: #667eea;
+    color: white;
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.login-right {
+    padding: 3rem;
+}
+
+.login-logo {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.login-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.login-subtitle {
+    opacity: 0.9;
+    margin-bottom: 2rem;
+}
+
+.form-floating {
+    margin-bottom: 1rem;
+}
+
+.login-card .form-control {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.login-card .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.btn-login {
+    background: #667eea;
+    border: none;
+    border-radius: 10px;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.features {
+    margin-top: 2rem;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+}
+
+.feature-icon {
+    margin-right: 0.75rem;
+    font-size: 1.2rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .login-left {
+        display: none;
+    }
+    
+    .login-card {
+        margin: 1rem;
+    }
+    
+    .login-right {
+        padding: 2rem;
+    }
+}

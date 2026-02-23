@@ -1,0 +1,393 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if mercancia %}Editar{% else %}Crear{% endif %} Mercancía{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-section {
+        background: white;
+        border-radius: 10px;
+        padding: 25px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+    }
+
+    .form-section h5 {
+        color: #667eea;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+    }
+
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="page-header">
+        <h1 class="mb-2">
+            <i class="fas fa-{% if mercancia %}edit{% else %}plus{% endif %}"></i>
+            {% if mercancia %}Editar Mercancía{% else %}Nueva Mercancía{% endif %}
+        </h1>
+        <p class="mb-0 opacity-90">
+            {% if mercancia %}
+            Actualizar información de {{ mercancia.nombre }}
+            {% else %}
+            Complete el formulario para registrar una nueva mercancía
+            {% endif %}
+        </p>
+    </div>
+
+    <!-- Mensajes -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Errores del formulario -->
+    {% if form.errors %}
+        <div class="alert alert-danger">
+            <h6><i class="fas fa-exclamation-triangle"></i> Error en el formulario:</h6>
+            {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                    <div><strong>{{ field }}:</strong> {{ error }}</div>
+                {% endfor %}
+            {% endfor %}
+            {% if form.non_field_errors %}
+                {% for error in form.non_field_errors %}
+                    <div>{{ error }}</div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Información Básica -->
+        <div class="form-section">
+            <h5><i class="fas fa-info-circle"></i> Información Básica</h5>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="id_codigo" class="form-label">Código</label>
+                        {{ form.codigo }}
+                        {% if form.codigo.errors %}
+                        <div class="text-danger small">{{ form.codigo.errors }}</div>
+                        {% endif %}
+                        <small class="form-text text-muted">Se genera automáticamente si se deja vacío</small>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        <label for="id_nombre" class="form-label required-field">Nombre</label>
+                        {{ form.nombre }}
+                        {% if form.nombre.errors %}
+                        <div class="text-danger small">{{ form.nombre.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="id_categoria" class="form-label required-field">Categoría</label>
+                        {{ form.categoria }}
+                        {% if form.categoria.errors %}
+                        <div class="text-danger small">{{ form.categoria.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="id_temperatura_almacenamiento" class="form-label">Temperatura de Almacenamiento</label>
+                        {{ form.temperatura_almacenamiento }}
+                        {% if form.temperatura_almacenamiento.errors %}
+                        <div class="text-danger small">{{ form.temperatura_almacenamiento.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="id_descripcion" class="form-label">Descripción</label>
+                {{ form.descripcion }}
+                {% if form.descripcion.errors %}
+                <div class="text-danger small">{{ form.descripcion.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Características Físicas -->
+        <div class="form-section">
+            <h5><i class="fas fa-weight"></i> Características Físicas</h5>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="id_peso_unitario" class="form-label">Peso Unitario (kg)</label>
+                        {{ form.peso_unitario }}
+                        {% if form.peso_unitario.errors %}
+                        <div class="text-danger small">{{ form.peso_unitario.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="id_volumen_unitario" class="form-label">Volumen Unitario (L)</label>
+                        {{ form.volumen_unitario }}
+                        {% if form.volumen_unitario.errors %}
+                        <div class="text-danger small">{{ form.volumen_unitario.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="id_stock_actual" class="form-label">Stock Actual</label>
+                        {{ form.stock_actual }}
+                        {% if form.stock_actual.errors %}
+                        <div class="text-danger small">{{ form.stock_actual.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Precios -->
+        <div class="form-section">
+            <h5><i class="fas fa-dollar-sign"></i> Precios</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="id_precio_compra" class="form-label">Precio de Compra</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            {{ form.precio_compra }}
+                        </div>
+                        {% if form.precio_compra.errors %}
+                        <div class="text-danger small">{{ form.precio_compra.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="id_precio_venta" class="form-label">Precio de Venta</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            {{ form.precio_venta }}
+                        </div>
+                        {% if form.precio_venta.errors %}
+                        <div class="text-danger small">{{ form.precio_venta.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div id="margen-display" class="alert alert-info" style="display: none;">
+                        <i class="fas fa-calculator"></i> <span id="margen-text">Margen de ganancia: 0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control de Calidad -->
+        <div class="form-section">
+            <h5><i class="fas fa-check-circle"></i> Control de Calidad y Vencimiento</h5>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-check mb-3">
+                        {{ form.requiere_vencimiento }}
+                        <label class="form-check-label" for="id_requiere_vencimiento">
+                            Requiere Control de Vencimiento
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-check mb-3">
+                        {{ form.requiere_lote }}
+                        <label class="form-check-label" for="id_requiere_lote">
+                            Requiere Control por Lotes
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="id_dias_vida_util" class="form-label">Días de Vida Útil</label>
+                        {{ form.dias_vida_util }}
+                        {% if form.dias_vida_util.errors %}
+                        <div class="text-danger small">{{ form.dias_vida_util.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estado y Observaciones -->
+        <div class="form-section">
+            <h5><i class="fas fa-cog"></i> Estado y Observaciones</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-check mb-3">
+                        {{ form.activo }}
+                        <label class="form-check-label" for="id_activo">
+                            Mercancía Activa
+                        </label>
+                    </div>
+                    <div class="form-check mb-3">
+                        {{ form.visible_venta }}
+                        <label class="form-check-label" for="id_visible_venta">
+                            Visible para Venta
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="id_observaciones" class="form-label">Observaciones</label>
+                        {{ form.observaciones }}
+                        {% if form.observaciones.errors %}
+                        <div class="text-danger small">{{ form.observaciones.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="d-flex gap-2 justify-content-end">
+            <a href="{% if mercancia %}{% url 'mercancia:detalle' mercancia.pk %}{% else %}{% url 'mercancia:index' %}{% endif %}" 
+               class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancelar
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Guardar
+            </button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-generación de código basado en categoría
+        const categoriaSelect = document.getElementById('id_categoria');
+        const codigoInput = document.getElementById('id_codigo');
+        
+        if (categoriaSelect && codigoInput) {
+            categoriaSelect.addEventListener('change', function() {
+                if (!codigoInput.value) {
+                    const categoriaText = this.options[this.selectedIndex].text;
+                    const prefijo = categoriaText.substring(0, 3).toUpperCase();
+                    const sufijo = Math.floor(1000 + Math.random() * 9000);
+                    codigoInput.value = prefijo + sufijo;
+                }
+            });
+        }
+
+        // Mostrar/ocultar días de vida útil según requiere vencimiento
+        const requiereVencimiento = document.getElementById('id_requiere_vencimiento');
+        const diasVidaUtilInput = document.getElementById('id_dias_vida_util');
+        
+        function toggleDiasVidaUtil() {
+            if (requiereVencimiento && diasVidaUtilInput) {
+                const diasVidaUtilGroup = diasVidaUtilInput.closest('.mb-3');
+                
+                if (diasVidaUtilGroup) {
+                    if (requiereVencimiento.checked) {
+                        diasVidaUtilGroup.style.display = 'block';
+                        diasVidaUtilInput.required = true;
+                        // Agregar clase visual para indicar que es requerido
+                        const label = diasVidaUtilGroup.querySelector('label');
+                        if (label && !label.textContent.includes('*')) {
+                            label.innerHTML += ' <span class="text-danger">*</span>';
+                        }
+                    } else {
+                        diasVidaUtilGroup.style.display = 'none';
+                        diasVidaUtilInput.required = false;
+                        diasVidaUtilInput.value = '';
+                        // Remover indicador visual de requerido
+                        const label = diasVidaUtilGroup.querySelector('label');
+                        if (label) {
+                            label.innerHTML = label.innerHTML.replace(' <span class="text-danger">*</span>', '');
+                        }
+                    }
+                }
+            }
+        }
+        
+        if (requiereVencimiento) {
+            requiereVencimiento.addEventListener('change', toggleDiasVidaUtil);
+            toggleDiasVidaUtil(); // Ejecutar al cargar la página
+        }
+
+        // Cálculo automático de margen de ganancia
+        const precioCompra = document.getElementById('id_precio_compra');
+        const precioVenta = document.getElementById('id_precio_venta');
+        const margenDisplay = document.getElementById('margen-display');
+        const margenText = document.getElementById('margen-text');
+        
+        function calcularMargen() {
+            const compra = parseFloat(precioCompra.value) || 0;
+            const venta = parseFloat(precioVenta.value) || 0;
+            
+            if (compra > 0 && venta > 0) {
+                const margen = ((venta - compra) / compra * 100).toFixed(2);
+                const ganancia = (venta - compra).toFixed(2);
+                
+                if (margenDisplay && margenText) {
+                    margenDisplay.style.display = 'block';
+                    margenText.textContent = `Margen de ganancia: ${margen}% (+ $${ganancia})`;
+                    
+                    // Cambiar color según el margen
+                    margenDisplay.className = 'alert ' + (margen > 20 ? 'alert-success' : margen > 10 ? 'alert-warning' : 'alert-danger');
+                }
+                
+                console.log('Margen de ganancia:', margen + '%');
+            } else if (margenDisplay) {
+                margenDisplay.style.display = 'none';
+            }
+        }
+        
+        if (precioCompra && precioVenta) {
+            precioCompra.addEventListener('input', calcularMargen);
+            precioVenta.addEventListener('input', calcularMargen);
+        }
+        
+        // Validación del formulario antes de enviar
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const requiereVenc = document.getElementById('id_requiere_vencimiento');
+                const diasVida = document.getElementById('id_dias_vida_util');
+                
+                if (requiereVenc && requiereVenc.checked && (!diasVida.value || diasVida.value <= 0)) {
+                    e.preventDefault();
+                    alert('Debe especificar los días de vida útil si la mercancía requiere control de vencimiento.');
+                    diasVida.focus();
+                    return false;
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

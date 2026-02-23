@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - UEB Acopio Bayamo{% endblock %}
+
+{% block content %}
+<div class="container mt-4" id="usuario-editar">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2>{{ title }}</h2>
+                    <p class="text-muted">Modificar información del usuario</p>
+                </div>
+                <div class="btn-group" role="group">
+                    <a href="{% url 'usuarios:detalle' usuario.pk %}" class="btn btn-outline-primary">
+                        <i class="fas fa-eye"></i> Ver Detalles
+                    </a>
+                    <a href="{% url 'usuarios:index' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </a>
+                </div>
+            </div>
+
+            <!-- Formulario -->
+            <div class="card">
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <strong>Por favor corrige los siguientes errores:</strong>
+                            <ul class="mb-0 mt-2">
+                                {% for field, errors in form.errors.items %}
+                                    {% for error in errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+
+                        <div class="row">
+                            <!-- Información básica -->
+                            <div class="col-md-6">
+                                <h5 class="border-bottom pb-2 mb-3">Información Básica</h5>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.username.id_for_label }}" class="form-label">
+                                        {{ form.username.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.username }}
+                                    {% if form.username.help_text %}
+                                    <div class="form-text">{{ form.username.help_text }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                                        {{ form.first_name.label }}
+                                    </label>
+                                    {{ form.first_name }}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                                        {{ form.last_name.label }}
+                                    </label>
+                                    {{ form.last_name }}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.email.id_for_label }}" class="form-label">
+                                        {{ form.email.label }}
+                                    </label>
+                                    {{ form.email }}
+                                </div>
+                            </div>
+
+                            <!-- Seguridad y permisos -->
+                            <div class="col-md-6">
+                                <h5 class="border-bottom pb-2 mb-3">Cambiar Contraseña</h5>
+                                
+                                <div class="alert alert-info">
+                                    <small>
+                                        <i class="fas fa-info-circle"></i>
+                                        Deja estos campos vacíos si no quieres cambiar la contraseña.
+                                    </small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.password1.id_for_label }}" class="form-label">
+                                        {{ form.password1.label }}
+                                    </label>
+                                    {{ form.password1 }}
+                                    <div class="form-text">
+                                        Debe tener al menos 8 caracteres.
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.password2.id_for_label }}" class="form-label">
+                                        {{ form.password2.label }}
+                                    </label>
+                                    {{ form.password2 }}
+                                </div>
+
+                                <h5 class="border-bottom pb-2 mb-3 mt-4">Permisos</h5>
+
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        {{ form.is_active }}
+                                        <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                            {{ form.is_active.label }}
+                                        </label>
+                                    </div>
+                                    <div class="form-text">
+                                        Los usuarios inactivos no pueden iniciar sesión.
+                                    </div>
+                                </div>
+
+                                {% if request.user.is_superuser %}
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        {{ form.is_staff }}
+                                        <label class="form-check-label" for="{{ form.is_staff.id_for_label }}">
+                                            {{ form.is_staff.label }}
+                                        </label>
+                                    </div>
+                                    <div class="form-text">
+                                        Los usuarios staff pueden acceder al panel de administración.
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Información adicional -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Información del Sistema</h5>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Fecha de registro:</strong> {{ usuario.date_joined|date:"d/m/Y H:i" }}</p>
+                                        <p><strong>Último acceso:</strong> {{ usuario.last_login|date:"d/m/Y H:i"|default:"Nunca" }}</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>ID de usuario:</strong> #{{ usuario.pk }}</p>
+                                        {% if usuario.is_superuser %}
+                                        <p><span class="badge bg-danger">Superusuario</span></p>
+                                        {% elif usuario.is_staff %}
+                                        <p><span class="badge bg-warning text-dark">Usuario Staff</span></p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botones de acción -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        {% if request.user == usuario %}
+                                        <a href="{% url 'usuarios:cambiar_password' %}" class="btn btn-outline-warning">
+                                            <i class="fas fa-key"></i> Cambiar Contraseña
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <a href="{% url 'usuarios:detalle' usuario.pk %}" class="btn btn-secondary">
+                                            <i class="fas fa-times"></i> Cancelar
+                                        </a>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save"></i> Guardar Cambios
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<script src="{% static 'js/usuarios.js' %}"></script>
+{% endblock %}

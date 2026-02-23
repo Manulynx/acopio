@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ cliente.razon_social }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="fas fa-building"></i> {{ cliente.razon_social }}</h2>
+                <div>
+                    <a href="{% url 'clientes:index' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </a>
+                    <a href="{% url 'clientes:editar' cliente.pk %}" class="btn btn-warning">
+                        <i class="fas fa-edit"></i> Editar
+                    </a>
+                    {% if cliente.activo %}
+                    <a href="{% url 'clientes:eliminar' cliente.pk %}" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Desactivar
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Información principal -->
+        <div class="col-md-8">
+            <!-- Información del cliente -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> Información del Cliente</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Código:</strong> {{ cliente.codigo }}</p>
+                            <p><strong>Razón Social:</strong> {{ cliente.razon_social }}</p>
+                            {% if cliente.nombre_comercial %}
+                            <p><strong>Nombre Comercial:</strong> {{ cliente.nombre_comercial }}</p>
+                            {% endif %}
+                            <p><strong>Identificación:</strong> {{ cliente.identificacion }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            {% if cliente.tipo_cliente %}
+                            <p><strong>Tipo de Cliente:</strong> 
+                                <span class="badge bg-info">{{ cliente.tipo_cliente.nombre }}</span>
+                            </p>
+                            {% endif %}
+                            <p><strong>Estado:</strong> 
+                                <span class="badge bg-{{ cliente.estado|lower }}">{{ cliente.get_estado_display }}</span>
+                            </p>
+                            <p><strong>Activo:</strong>
+                                {% if cliente.activo %}
+                                <span class="badge bg-success">Sí</span>
+                                {% else %}
+                                <span class="badge bg-danger">No</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información de contacto principal -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-address-book"></i> Información de Contacto</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            {% if cliente.telefono %}
+                            <p><i class="fas fa-phone"></i> <strong>Teléfono:</strong> {{ cliente.telefono }}</p>
+                            {% endif %}
+                            {% if cliente.email %}
+                            <p><i class="fas fa-envelope"></i> <strong>Email:</strong> {{ cliente.email }}</p>
+                            {% endif %}
+                            {% if cliente.sitio_web %}
+                            <p><i class="fas fa-globe"></i> <strong>Sitio Web:</strong> 
+                                <a href="{{ cliente.sitio_web }}" target="_blank">{{ cliente.sitio_web }}</a>
+                            </p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {% if cliente.direccion %}
+                            <p><i class="fas fa-map-marker-alt"></i> <strong>Dirección:</strong><br>{{ cliente.direccion }}</p>
+                            {% endif %}
+                            {% if cliente.ciudad %}
+                            <p><i class="fas fa-city"></i> <strong>Ciudad:</strong> {{ cliente.ciudad }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contactos adicionales -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-users"></i> Contactos</h5>
+                    <a href="{% url 'clientes:contacto_crear' cliente.pk %}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus"></i> Agregar Contacto
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if contactos %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Cargo</th>
+                                    <th>Teléfono</th>
+                                    <th>Email</th>
+                                    <th>Principal</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for contacto in contactos %}
+                                <tr>
+                                    <td>{{ contacto.nombre }}</td>
+                                    <td>{{ contacto.cargo|default:"-" }}</td>
+                                    <td>{{ contacto.telefono|default:"-" }}</td>
+                                    <td>{{ contacto.email|default:"-" }}</td>
+                                    <td>
+                                        {% if contacto.es_principal %}
+                                        <span class="badge bg-success">Sí</span>
+                                        {% else %}
+                                        <span class="text-muted">No</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'clientes:contacto_editar' contacto.pk %}" class="btn btn-sm btn-outline-warning">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No hay contactos adicionales registrados</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Direcciones adicionales -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-map-marked-alt"></i> Direcciones</h5>
+                    <a href="{% url 'clientes:direccion_crear' cliente.pk %}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus"></i> Agregar Dirección
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if direcciones %}
+                    <div class="list-group">
+                        {% for direccion in direcciones %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">
+                                    {{ direccion.nombre_referencia }}
+                                    {% if direccion.es_principal %}
+                                    <span class="badge bg-success">Principal</span>
+                                    {% endif %}
+                                </h6>
+                                <a href="{% url 'clientes:direccion_editar' direccion.pk %}" class="btn btn-sm btn-outline-warning">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </div>
+                            <p class="mb-1">{{ direccion.direccion_completa }}</p>
+                            <small class="text-muted">
+                                {{ direccion.ciudad }}, {{ direccion.departamento }} - {{ direccion.pais }}
+                            </small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No hay direcciones adicionales registradas</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Observaciones -->
+            {% if cliente.observaciones %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-comment-alt"></i> Observaciones</h5>
+                </div>
+                <div class="card-body">
+                    <p>{{ cliente.observaciones }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Panel lateral -->
+        <div class="col-md-4">
+            <!-- Estadísticas -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Estadísticas</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Contactos:</strong> {{ contactos.count }}</p>
+                    <p><strong>Direcciones:</strong> {{ direcciones.count }}</p>
+                    <p class="text-muted"><small>Ventas e historial próximamente...</small></p>
+                </div>
+            </div>
+
+            <!-- Información de registro -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-clock"></i> Información de Registro</h5>
+                </div>
+                <div class="card-body">
+                    <p><small><strong>Creado por:</strong> {{ cliente.creado_por.get_full_name|default:cliente.creado_por.username }}</small></p>
+                    <p><small><strong>Fecha de creación:</strong> {{ cliente.fecha_creacion|date:"d/m/Y H:i" }}</small></p>
+                    <p><small><strong>Última actualización:</strong> {{ cliente.fecha_actualizacion|date:"d/m/Y H:i" }}</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.bg-activo { background-color: #28a745 !important; }
+.bg-inactivo { background-color: #6c757d !important; }
+.bg-moroso { background-color: #dc3545 !important; }
+.bg-suspendido { background-color: #ffc107 !important; color: #000 !important; }
+</style>
+{% endblock %}

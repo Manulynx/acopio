@@ -1,0 +1,307 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ inmueble.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="fas fa-building"></i> {{ inmueble.nombre }}</h2>
+                <div>
+                    <a href="{% url 'inmuebles:index' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </a>
+                    <a href="{% url 'inmuebles:editar' inmueble.pk %}" class="btn btn-warning">
+                        <i class="fas fa-edit"></i> Editar
+                    </a>
+                    {% if inmueble.activo %}
+                    <a href="{% url 'inmuebles:eliminar' inmueble.pk %}" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Desactivar
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Información principal -->
+        <div class="col-md-8">
+            <!-- Imágenes -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-images"></i> Imágenes</h5>
+                </div>
+                <div class="card-body">
+                    {% if imagenes %}
+                    <div id="carouselInmueble" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            {% for imagen in imagenes %}
+                            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                <img src="{{ imagen.imagen.url }}" class="d-block w-100" alt="{{ imagen.titulo }}" style="max-height: 400px; object-fit: contain;">
+                                {% if imagen.descripcion %}
+                                <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-75 rounded">
+                                    <p>{{ imagen.descripcion }}</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% if imagenes|length > 1 %}
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselInmueble" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Anterior</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carouselInmueble" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Siguiente</span>
+                        </button>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <div class="text-center p-5 bg-light">
+                        <i class="fas fa-image fa-4x text-muted mb-3"></i>
+                        <p>No hay imágenes disponibles</p>
+                    </div>
+                    {% endif %}
+                    <div class="mt-3">
+                        <a href="{% url 'inmuebles:imagen_crear' inmueble.pk %}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-plus"></i> Agregar Imagen
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Descripción -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-align-left"></i> Descripción</h5>
+                </div>
+                <div class="card-body">
+                    <p>{{ inmueble.descripcion|default:"Sin descripción disponible" }}</p>
+                </div>
+            </div>
+
+            <!-- Características físicas -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-ruler-combined"></i> Características Físicas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Área Total:</strong> {{ inmueble.area_total }} m²</p>
+                            <p><strong>Área Útil:</strong> {{ inmueble.area_util|default:"N/A" }} m²</p>
+                            <p><strong>Altura:</strong> {{ inmueble.altura|default:"N/A" }} m</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Capacidad de Carga:</strong> {{ inmueble.capacidad_carga|default:"N/A" }} kg</p>
+                            <p><strong>Número de Niveles:</strong> {{ inmueble.numero_niveles|default:"N/A" }}</p>
+                            <p><strong>Año Construcción:</strong> {{ inmueble.ano_construccion|default:"N/A" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Servicios y características -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-cogs"></i> Servicios y Características</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p>
+                                <i class="fas {% if inmueble.electricidad %}fa-check-circle text-success{% else %}fa-times-circle text-danger{% endif %}"></i>
+                                Electricidad
+                            </p>
+                            <p>
+                                <i class="fas {% if inmueble.agua %}fa-check-circle text-success{% else %}fa-times-circle text-danger{% endif %}"></i>
+                                Agua
+                            </p>
+                            <p>
+                                <i class="fas {% if inmueble.gas %}fa-check-circle text-success{% else %}fa-times-circle text-danger{% endif %}"></i>
+                                Gas
+                            </p>
+                            <p>
+                                <i class="fas {% if inmueble.internet %}fa-check-circle text-success{% else %}fa-times-circle text-danger{% endif %}"></i>
+                                Internet
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p>
+                                <i class="fas {% if inmueble.seguridad %}fa-check-circle text-success{% else %}fa-times-circle text-danger{% endif %}"></i>
+                                Seguridad
+                            </p>
+                            <p>
+                                <i class="fas {% if inmueble.vigilancia_24h %}fa-check-circle text-success{% else %}fa-times-circle text-danger{% endif %}"></i>
+                                Vigilancia 24h
+                            </p>
+                            <p>
+                                <i class="fas {% if inmueble.camaras %}fa-check-circle text-success{% else %}fa-times-circle text-danger{% endif %}"></i>
+                                Cámaras de Seguridad
+                            </p>
+                            <p>
+                                <i class="fas {% if inmueble.parqueadero %}fa-check-circle text-success{% else %}fa-times-circle text-danger{% endif %}"></i>
+                                Parqueadero
+                            </p>
+                        </div>
+                    </div>
+
+                    {% if caracteristicas %}
+                    <hr>
+                    <h6><strong>Características Adicionales:</strong></h6>
+                    <ul>
+                        {% for caracteristica in caracteristicas %}
+                        <li>{{ caracteristica.nombre }}: {{ caracteristica.valor }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Mantenimientos -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-wrench"></i> Historial de Mantenimientos</h5>
+                    <a href="{% url 'inmuebles:mantenimiento_crear' inmueble.pk %}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus"></i> Nuevo
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if mantenimientos %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>
+                                    <th>Descripción</th>
+                                    <th>Estado</th>
+                                    <th>Costo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for mant in mantenimientos %}
+                                <tr>
+                                    <td>{{ mant.fecha_programada|date:"d/m/Y" }}</td>
+                                    <td><span class="badge bg-secondary">{{ mant.get_tipo_display }}</span></td>
+                                    <td>{{ mant.descripcion|truncatewords:10 }}</td>
+                                    <td><span class="badge bg-{{ mant.estado|lower }}">{{ mant.get_estado_display }}</span></td>
+                                    <td>${{ mant.costo_estimado|floatformat:0 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No hay mantenimientos registrados</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel lateral -->
+        <div class="col-md-4">
+            <!-- Información básica -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> Información Básica</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Código:</strong> {{ inmueble.codigo }}</p>
+                    <p><strong>Tipo:</strong> {{ inmueble.tipo.nombre }}</p>
+                    <p>
+                        <strong>Estado:</strong>
+                        <span class="badge bg-{{ inmueble.estado|lower }}">
+                            {{ inmueble.get_estado_display }}
+                        </span>
+                    </p>
+                    <p>
+                        <strong>Activo:</strong>
+                        {% if inmueble.activo %}
+                        <span class="badge bg-success">Sí</span>
+                        {% else %}
+                        <span class="badge bg-danger">No</span>
+                        {% endif %}
+                    </p>
+                    {% if inmueble.destacado %}
+                    <p>
+                        <span class="badge bg-warning text-dark">
+                            <i class="fas fa-star"></i> Destacado
+                        </span>
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Ubicación -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-map-marker-alt"></i> Ubicación</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Dirección:</strong><br>{{ inmueble.direccion }}</p>
+                    <p><strong>Ciudad:</strong> {{ inmueble.ciudad }}</p>
+                    <p><strong>Departamento:</strong> {{ inmueble.departamento }}</p>
+                    {% if inmueble.latitud and inmueble.longitud %}
+                    <p>
+                        <strong>Coordenadas:</strong><br>
+                        Lat: {{ inmueble.latitud }}<br>
+                        Lng: {{ inmueble.longitud }}
+                    </p>
+                    <a href="https://www.google.com/maps?q={{ inmueble.latitud }},{{ inmueble.longitud }}" 
+                       target="_blank" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-map"></i> Ver en Mapa
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Información de arriendo -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-dollar-sign"></i> Información de Arriendo</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        <strong>Precio Mensual:</strong><br>
+                        <span class="h4 text-primary">${{ inmueble.precio_arriendo_mensual|floatformat:0 }}</span>
+                    </p>
+                    {% if inmueble.gastos_comunes %}
+                    <p><strong>Gastos Comunes:</strong> ${{ inmueble.gastos_comunes|floatformat:0 }}</p>
+                    {% endif %}
+                    {% if inmueble.deposito_garantia %}
+                    <p><strong>Depósito de Garantía:</strong> ${{ inmueble.deposito_garantia|floatformat:0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Información de registro -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-clock"></i> Información de Registro</h5>
+                </div>
+                <div class="card-body">
+                    <p><small><strong>Creado por:</strong> {{ inmueble.creado_por.get_full_name|default:inmueble.creado_por.username }}</small></p>
+                    <p><small><strong>Fecha de creación:</strong> {{ inmueble.fecha_creacion|date:"d/m/Y H:i" }}</small></p>
+                    <p><small><strong>Última actualización:</strong> {{ inmueble.fecha_actualizacion|date:"d/m/Y H:i" }}</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.bg-disponible { background-color: #28a745 !important; }
+.bg-arrendado { background-color: #17a2b8 !important; }
+.bg-mantenimiento { background-color: #ffc107 !important; color: #000 !important; }
+.bg-no_disponible { background-color: #6c757d !important; }
+.bg-pendiente { background-color: #ffc107 !important; color: #000 !important; }
+.bg-en_progreso { background-color: #17a2b8 !important; }
+.bg-completado { background-color: #28a745 !important; }
+.bg-cancelado { background-color: #dc3545 !important; }
+</style>
+{% endblock %}

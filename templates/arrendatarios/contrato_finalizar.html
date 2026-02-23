@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Finalizar Contrato{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="fas fa-check-circle text-success"></i> Finalizar Contrato</h2>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">¿Está seguro de finalizar este contrato?</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <strong><i class="fas fa-info-circle"></i> Nota:</strong>
+                        El contrato será marcado como finalizado y el inmueble quedará disponible para nuevos arriendos.
+                    </div>
+
+                    <p><strong>Número de Contrato:</strong> {{ contrato.numero_contrato }}</p>
+                    <p><strong>Arrendatario:</strong> {{ contrato.arrendatario.nombre_completo }}</p>
+                    <p><strong>Inmueble:</strong> {{ contrato.inmueble.nombre }}</p>
+                    <p><strong>Fecha de Inicio:</strong> {{ contrato.fecha_inicio|date:"d/m/Y" }}</p>
+                    <p><strong>Fecha de Fin:</strong> {{ contrato.fecha_fin|date:"d/m/Y" }}</p>
+                    <p><strong>Estado Actual:</strong> 
+                        <span class="badge bg-{{ contrato.estado|lower }}">{{ contrato.get_estado_display }}</span>
+                    </p>
+
+                    <form method="post" class="mt-4">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'arrendatarios:contrato_detalle' contrato.pk %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-check"></i> Finalizar Contrato
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

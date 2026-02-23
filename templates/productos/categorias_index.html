@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .categoria-card {
+        transition: transform 0.2s;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .categoria-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    .badge-productos {
+        background: linear-gradient(45deg, #007bff, #0056b3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">{{ title }}</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'productos:index' %}">Productos</a></li>
+                    <li class="breadcrumb-item active">Categorías</li>
+                </ol>
+            </nav>
+        </div>
+        <div>
+            <a href="{% url 'productos:categoria_crear' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Nueva Categoría
+            </a>
+            <a href="{% url 'productos:index' %}" class="btn btn-outline-secondary ms-2">
+                <i class="fas fa-arrow-left"></i> Volver a Productos
+            </a>
+        </div>
+    </div>
+
+    <!-- Lista de categorías -->
+    <div class="row">
+        {% for categoria in categorias %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card categoria-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-tag text-primary me-2"></i>
+                                {{ categoria.nombre }}
+                            </h5>
+                            <span class="badge badge-productos">
+                                {{ categoria.total_productos }} productos
+                            </span>
+                        </div>
+                        
+                        {% if categoria.descripcion %}
+                            <p class="card-text text-muted">{{ categoria.descripcion }}</p>
+                        {% else %}
+                            <p class="card-text text-muted fst-italic">Sin descripción</p>
+                        {% endif %}
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                {% if categoria.activa %}
+                                    <span class="badge bg-success">Activa</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Inactiva</span>
+                                {% endif %}
+                            </div>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'productos:index' %}?categoria={{ categoria.id }}" 
+                                   class="btn btn-outline-primary" title="Ver productos">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <button class="btn btn-outline-warning" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light">
+                        <small class="text-muted">
+                            <i class="fas fa-calendar"></i> 
+                            Creada: {{ categoria.fecha_creacion|date:"d/m/Y" }}
+                            {% if categoria.creado_por %}
+                                por {{ categoria.creado_por.get_full_name|default:categoria.creado_por.username }}
+                            {% endif %}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-tags fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No hay categorías registradas</h5>
+                    <p class="text-muted">Las categorías ayudan a organizar mejor tus productos.</p>
+                    <a href="{% url 'productos:categoria_crear' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Crear primera categoría
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Confirmar acciones si es necesario
+    document.addEventListener('DOMContentLoaded', function() {
+        // Aquí se pueden agregar funcionalidades adicionales
+    });
+</script>
+{% endblock %}

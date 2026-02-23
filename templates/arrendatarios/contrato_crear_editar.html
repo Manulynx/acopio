@@ -1,0 +1,372 @@
+{% extends 'base.html' %} {% load static %} {% block title %}{{ titulo
+}}{%endblock %} {% block content %}
+<div class="container-fluid">
+  <div class="row mb-4">
+    <div class="col-12">
+      <h2><i class="fas fa-file-contract"></i> {{ titulo }}</h2>
+    </div>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-md-10">
+      <div class="card">
+        <div class="card-body">
+          <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %} {% if form.non_field_errors %}
+            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <div class="row">
+              <!-- Información del contrato -->
+              <div class="col-12">
+                <h5 class="border-bottom pb-2 mb-3">
+                  <i class="fas fa-file-alt"></i> Información del Contrato
+                </h5>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label
+                  for="{{ form.numero_contrato.id_for_label }}"
+                  class="form-label"
+                  >{{ form.numero_contrato.label }} *</label
+                >
+                {{ form.numero_contrato }} {% if form.numero_contrato.errors %}
+                <div class="text-danger">{{ form.numero_contrato.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label for="{{ form.estado.id_for_label }}" class="form-label"
+                  >{{ form.estado.label }} *</label
+                >
+                {{ form.estado }} {% if form.estado.errors %}
+                <div class="text-danger">{{ form.estado.errors }}</div>
+                {% endif %}
+              </div>
+
+              <!-- Partes del contrato -->
+              <div class="col-12">
+                <h5 class="border-bottom pb-2 mb-3 mt-3">
+                  <i class="fas fa-users"></i> Partes del Contrato
+                </h5>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label
+                  for="{{ form.arrendatario.id_for_label }}"
+                  class="form-label"
+                  >{{ form.arrendatario.label }} *</label
+                >
+                {{ form.arrendatario }} {% if form.arrendatario.errors %}
+                <div class="text-danger">{{ form.arrendatario.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label for="{{ form.inmueble.id_for_label }}" class="form-label"
+                  >{{ form.inmueble.label }} *</label
+                >
+                {{ form.inmueble }} {% if form.inmueble.errors %}
+                <div class="text-danger">{{ form.inmueble.errors }}</div>
+                {% endif %}
+              </div>
+
+              <!-- Fechas y duración -->
+              <div class="col-12">
+                <h5 class="border-bottom pb-2 mb-3 mt-3">
+                  <i class="fas fa-calendar-alt"></i> Fechas y Duración
+                </h5>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label
+                  for="{{ form.fecha_inicio.id_for_label }}"
+                  class="form-label"
+                  >{{ form.fecha_inicio.label }} *</label
+                >
+                {{ form.fecha_inicio }} {% if form.fecha_inicio.errors %}
+                <div class="text-danger">{{ form.fecha_inicio.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label
+                  for="{{ form.fecha_fin.id_for_label }}"
+                  class="form-label"
+                  >{{ form.fecha_fin.label }} *</label
+                >
+                {{ form.fecha_fin }} {% if form.fecha_fin.errors %}
+                <div class="text-danger">{{ form.fecha_fin.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <label for="{{ form.dia_pago.id_for_label }}" class="form-label"
+                  >{{ form.dia_pago.label }} *</label
+                >
+                {{ form.dia_pago }} {% if form.dia_pago.errors %}
+                <div class="text-danger">{{ form.dia_pago.errors }}</div>
+                {% endif %}
+                <small class="form-text text-muted"
+                  >Día del mes para el pago (1-31)</small
+                >
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <label
+                  for="{{ form.fecha_firma.id_for_label }}"
+                  class="form-label"
+                  >{{ form.fecha_firma.label }}</label
+                >
+                {{ form.fecha_firma }} {% if form.fecha_firma.errors %}
+                <div class="text-danger">{{ form.fecha_firma.errors }}</div>
+                {% endif %}
+                <small class="form-text text-muted"
+                  >Fecha en que se firmó el contrato</small
+                >
+              </div>
+
+              <!-- Valores económicos -->
+              <div class="col-12">
+                <h5 class="border-bottom pb-2 mb-3 mt-3">
+                  <i class="fas fa-dollar-sign"></i> Valores Económicos
+                </h5>
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <label
+                  for="{{ form.valor_arriendo.id_for_label }}"
+                  class="form-label"
+                  >{{ form.valor_arriendo.label }} *</label
+                >
+                {{ form.valor_arriendo }} {% if form.valor_arriendo.errors %}
+                <div class="text-danger">{{ form.valor_arriendo.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <label
+                  for="{{ form.valor_deposito.id_for_label }}"
+                  class="form-label"
+                  >{{ form.valor_deposito.label }}</label
+                >
+                {{ form.valor_deposito }} {% if form.valor_deposito.errors %}
+                <div class="text-danger">{{ form.valor_deposito.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <label
+                  for="{{ form.gastos_comunes.id_for_label }}"
+                  class="form-label"
+                  >{{ form.gastos_comunes.label }}</label
+                >
+                {{ form.gastos_comunes }} {% if form.gastos_comunes.errors %}
+                <div class="text-danger">{{ form.gastos_comunes.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <label
+                  for="{{ form.tipo_pago.id_for_label }}"
+                  class="form-label"
+                  >{{ form.tipo_pago.label }} *</label
+                >
+                {{ form.tipo_pago }} {% if form.tipo_pago.errors %}
+                <div class="text-danger">{{ form.tipo_pago.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <label class="form-label">
+                  {{ form.permite_incremento.label }}
+                </label>
+                <div class="form-check">
+                  {{ form.permite_incremento }}
+                  <label
+                    class="form-check-label"
+                    for="{{ form.permite_incremento.id_for_label }}"
+                  >
+                    Permitir incremento anual
+                  </label>
+                </div>
+                {% if form.permite_incremento.errors %}
+                <div class="text-danger">
+                  {{ form.permite_incremento.errors }}
+                </div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <label
+                  for="{{ form.porcentaje_incremento.id_for_label }}"
+                  class="form-label"
+                  >{{ form.porcentaje_incremento.label }}</label
+                >
+                {{ form.porcentaje_incremento }} {% if form.porcentaje_incremento.errors %}
+                <div class="text-danger">
+                  {{ form.porcentaje_incremento.errors }}
+                </div>
+                {% endif %}
+                <small class="form-text text-muted"
+                  >Porcentaje de incremento anual (ejemplo: 3.5)</small
+                >
+              </div>
+
+              <!-- Condiciones adicionales -->
+              <div class="col-12">
+                <h5 class="border-bottom pb-2 mb-3 mt-3">
+                  <i class="fas fa-cogs"></i> Condiciones Adicionales
+                </h5>
+              </div>
+
+              <div class="col-md-3 mb-3">
+                <label class="form-label">
+                  {{ form.incluye_servicios.label }}
+                </label>
+                <div class="form-check">
+                  {{ form.incluye_servicios }}
+                  <label
+                    class="form-check-label"
+                    for="{{ form.incluye_servicios.id_for_label }}"
+                  >
+                    Incluye servicios básicos
+                  </label>
+                </div>
+                {% if form.incluye_servicios.errors %}
+                <div class="text-danger">
+                  {{ form.incluye_servicios.errors }}
+                </div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-3 mb-3">
+                <label class="form-label">
+                  {{ form.permite_subarriendo.label }}
+                </label>
+                <div class="form-check">
+                  {{ form.permite_subarriendo }}
+                  <label
+                    class="form-check-label"
+                    for="{{ form.permite_subarriendo.id_for_label }}"
+                  >
+                    Permite subarriendo
+                  </label>
+                </div>
+                {% if form.permite_subarriendo.errors %}
+                <div class="text-danger">
+                  {{ form.permite_subarriendo.errors }}
+                </div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-3 mb-3">
+                <label class="form-label">
+                  {{ form.requiere_seguro.label }}
+                </label>
+                <div class="form-check">
+                  {{ form.requiere_seguro }}
+                  <label
+                    class="form-check-label"
+                    for="{{ form.requiere_seguro.id_for_label }}"
+                  >
+                    Requiere seguro
+                  </label>
+                </div>
+                {% if form.requiere_seguro.errors %}
+                <div class="text-danger">{{ form.requiere_seguro.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-12 mb-3">
+                <label
+                  for="{{ form.servicios_incluidos.id_for_label }}"
+                  class="form-label"
+                  >{{ form.servicios_incluidos.label }}</label
+                >
+                {{ form.servicios_incluidos }} {% if form.servicios_incluidos.errors %}
+                <div class="text-danger">
+                  {{ form.servicios_incluidos.errors }}
+                </div>
+                {% endif %}
+                <small class="form-text text-muted"
+                  >Detalle de los servicios incluidos en el arriendo</small
+                >
+              </div>
+
+              <div class="col-md-12 mb-3">
+                <label
+                  for="{{ form.clausulas_especiales.id_for_label }}"
+                  class="form-label"
+                  >{{ form.clausulas_especiales.label }}</label
+                >
+                {{ form.clausulas_especiales }} {% if form.clausulas_especiales.errors %}
+                <div class="text-danger">
+                  {{ form.clausulas_especiales.errors }}
+                </div>
+                {% endif %}
+                <small class="form-text text-muted"
+                  >Cláusulas especiales del contrato</small
+                >
+              </div>
+
+              <!-- Documento del contrato -->
+              <div class="col-12">
+                <h5 class="border-bottom pb-2 mb-3 mt-3">
+                  <i class="fas fa-file-pdf"></i> Documento del Contrato
+                </h5>
+              </div>
+
+              <div class="col-md-12 mb-3">
+                <label
+                  for="{{ form.archivo_contrato.id_for_label }}"
+                  class="form-label"
+                  >{{ form.archivo_contrato.label }}</label
+                >
+                {{ form.archivo_contrato }} {% if form.archivo_contrato.errors %}
+                <div class="text-danger">
+                  {{ form.archivo_contrato.errors }}
+                </div>
+                {% endif %}
+                <small class="form-text text-muted"
+                  >Formato PDF. Tamaño máximo: 10MB</small
+                >
+              </div>
+
+              <!-- Observaciones -->
+              <div class="col-12">
+                <h5 class="border-bottom pb-2 mb-3 mt-3">
+                  <i class="fas fa-comment-alt"></i> Observaciones
+                </h5>
+              </div>
+
+              <div class="col-md-12 mb-3">
+                <label
+                  for="{{ form.observaciones.id_for_label }}"
+                  class="form-label"
+                  >{{ form.observaciones.label }}</label
+                >
+                {{ form.observaciones }} {% if form.observaciones.errors %}
+                <div class="text-danger">{{ form.observaciones.errors }}</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+              <a
+                href="{% url 'arrendatarios:contrato_index' %}"
+                class="btn btn-secondary"
+              >
+                <i class="fas fa-times"></i> Cancelar
+              </a>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> {{ boton }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

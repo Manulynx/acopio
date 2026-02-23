@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ arrendatario.nombre_completo }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="fas fa-user"></i> {{ arrendatario.nombre_completo }}</h2>
+                <div>
+                    <a href="{% url 'arrendatarios:index' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </a>
+                    <a href="{% url 'arrendatarios:editar' arrendatario.pk %}" class="btn btn-warning">
+                        <i class="fas fa-edit"></i> Editar
+                    </a>
+                    {% if arrendatario.activo %}
+                    <a href="{% url 'arrendatarios:eliminar' arrendatario.pk %}" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Eliminar
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Información principal -->
+        <div class="col-md-8">
+            <!-- Información personal/empresarial -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-id-card"></i> Información {{ arrendatario.get_tipo_persona_display }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Código:</strong> {{ arrendatario.codigo }}</p>
+                            <p><strong>Tipo:</strong> 
+                                <span class="badge bg-secondary">{{ arrendatario.get_tipo_persona_display }}</span>
+                            </p>
+                            <p><strong>Identificación:</strong> {{ arrendatario.identificacion }}</p>
+                            
+                            {% if arrendatario.tipo_persona == 'NATURAL' %}
+                                <p><strong>Nombres:</strong> {{ arrendatario.nombres }}</p>
+                                <p><strong>Apellidos:</strong> {{ arrendatario.apellidos }}</p>
+                                {% if arrendatario.fecha_nacimiento %}
+                                <p><strong>Fecha de Nacimiento:</strong> {{ arrendatario.fecha_nacimiento|date:"d/m/Y" }}</p>
+                                <p><strong>Edad:</strong> {{ arrendatario.edad }} años</p>
+                                {% endif %}
+                            {% else %}
+                                <p><strong>Razón Social:</strong> {{ arrendatario.razon_social }}</p>
+                                <p><strong>Nombre Comercial:</strong> {{ arrendatario.nombre_comercial|default:"N/A" }}</p>
+                                {% if arrendatario.representante_legal %}
+                                <p><strong>Representante Legal:</strong> {{ arrendatario.representante_legal }}</p>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {% if arrendatario.tipo_arrendatario %}
+                            <p><strong>Tipo de Arrendatario:</strong> 
+                                <span class="badge bg-info">{{ arrendatario.tipo_arrendatario.nombre }}</span>
+                            </p>
+                            {% endif %}
+                            <p><strong>Estado:</strong> 
+                                <span class="badge bg-{{ arrendatario.estado|lower }}">{{ arrendatario.get_estado_display }}</span>
+                            </p>
+                            <p><strong>Activo:</strong>
+                                {% if arrendatario.activo %}
+                                <span class="badge bg-success">Sí</span>
+                                {% else %}
+                                <span class="badge bg-danger">No</span>
+                                {% endif %}
+                            </p>
+                            <p><strong>Calificación:</strong> 
+                                {% if arrendatario.calificacion %}
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= arrendatario.calificacion %}
+                                        <i class="fas fa-star text-warning"></i>
+                                        {% else %}
+                                        <i class="far fa-star text-muted"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="text-muted">Sin calificación</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información de contacto -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-address-book"></i> Información de Contacto</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            {% if arrendatario.telefono %}
+                            <p><i class="fas fa-phone"></i> <strong>Teléfono:</strong> {{ arrendatario.telefono }}</p>
+                            {% endif %}
+                            {% if arrendatario.celular %}
+                            <p><i class="fas fa-mobile-alt"></i> <strong>Celular:</strong> {{ arrendatario.celular }}</p>
+                            {% endif %}
+                            {% if arrendatario.email %}
+                            <p><i class="fas fa-envelope"></i> <strong>Email:</strong> {{ arrendatario.email }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {% if arrendatario.direccion %}
+                            <p><i class="fas fa-map-marker-alt"></i> <strong>Dirección:</strong><br>{{ arrendatario.direccion }}</p>
+                            {% endif %}
+                            {% if arrendatario.ciudad %}
+                            <p><i class="fas fa-city"></i> <strong>Ciudad:</strong> {{ arrendatario.ciudad }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if arrendatario.contacto_emergencia_nombre or arrendatario.contacto_emergencia_telefono %}
+                    <hr>
+                    <h6><strong>Contacto de Emergencia:</strong></h6>
+                    <p><strong>Nombre:</strong> {{ arrendatario.contacto_emergencia_nombre }}</p>
+                    <p><strong>Teléfono:</strong> {{ arrendatario.contacto_emergencia_telefono }}</p>
+                    {% if arrendatario.contacto_emergencia_parentesco %}
+                    <p><strong>Parentesco:</strong> {{ arrendatario.contacto_emergencia_parentesco }}</p>
+                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Contratos activos -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-file-contract"></i> Contratos Activos</h5>
+                    <a href="{% url 'arrendatarios:contrato_crear' %}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus"></i> Nuevo Contrato
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if contratos_activos %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>N° Contrato</th>
+                                    <th>Inmueble</th>
+                                    <th>Inicio</th>
+                                    <th>Fin</th>
+                                    <th>Valor</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for contrato in contratos_activos %}
+                                <tr>
+                                    <td><strong>{{ contrato.numero_contrato }}</strong></td>
+                                    <td>{{ contrato.inmueble.nombre }}</td>
+                                    <td>{{ contrato.fecha_inicio|date:"d/m/Y" }}</td>
+                                    <td>{{ contrato.fecha_fin|date:"d/m/Y" }}</td>
+                                    <td>${{ contrato.valor_arriendo|floatformat:0 }}</td>
+                                    <td>
+                                        <a href="{% url 'arrendatarios:contrato_detalle' contrato.pk %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No tiene contratos activos</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Historial de contratos -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-history"></i> Historial de Contratos</h5>
+                </div>
+                <div class="card-body">
+                    {% if contratos %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>N° Contrato</th>
+                                    <th>Inmueble</th>
+                                    <th>Período</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for contrato in contratos %}
+                                <tr>
+                                    <td><strong>{{ contrato.numero_contrato }}</strong></td>
+                                    <td>{{ contrato.inmueble.nombre }}</td>
+                                    <td>{{ contrato.fecha_inicio|date:"d/m/Y" }} - {{ contrato.fecha_fin|date:"d/m/Y" }}</td>
+                                    <td><span class="badge bg-{{ contrato.estado|lower }}">{{ contrato.get_estado_display }}</span></td>
+                                    <td>
+                                        <a href="{% url 'arrendatarios:contrato_detalle' contrato.pk %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No hay contratos registrados</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Documentos -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-file-alt"></i> Documentos</h5>
+                    <a href="{% url 'arrendatarios:documento_crear' arrendatario.pk %}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus"></i> Agregar Documento
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if documentos %}
+                    <div class="list-group">
+                        {% for doc in documentos %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ doc.tipo_documento }}</h6>
+                                {% if doc.descripcion %}
+                                <p class="mb-1 text-muted small">{{ doc.descripcion }}</p>
+                                {% endif %}
+                                <small class="text-muted">
+                                    Subido el {{ doc.fecha_creacion|date:"d/m/Y" }}
+                                </small>
+                            </div>
+                            <div>
+                                <a href="{{ doc.archivo.url }}" target="_blank" class="btn btn-sm btn-outline-primary" title="Descargar">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                                <a href="{% url 'arrendatarios:documento_eliminar' doc.pk %}" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No hay documentos registrados</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel lateral -->
+        <div class="col-md-4">
+            <!-- Estadísticas -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Estadísticas</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Total Contratos:</strong> {{ estadisticas.total_contratos }}</p>
+                    <p><strong>Contratos Activos:</strong> {{ estadisticas.contratos_activos }}</p>
+                    <p><strong>Documentos:</strong> {{ estadisticas.documentos }}</p>
+                </div>
+            </div>
+
+            <!-- Observaciones -->
+            {% if arrendatario.observaciones %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-comment-alt"></i> Observaciones</h5>
+                </div>
+                <div class="card-body">
+                    <p>{{ arrendatario.observaciones }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Información de registro -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-clock"></i> Información de Registro</h5>
+                </div>
+                <div class="card-body">
+                    <p><small><strong>Creado por:</strong> {{ arrendatario.creado_por.get_full_name|default:arrendatario.creado_por.username }}</small></p>
+                    <p><small><strong>Fecha de creación:</strong> {{ arrendatario.fecha_creacion|date:"d/m/Y H:i" }}</small></p>
+                    <p><small><strong>Última actualización:</strong> {{ arrendatario.fecha_actualizacion|date:"d/m/Y H:i" }}</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.bg-activo { background-color: #28a745 !important; }
+.bg-inactivo { background-color: #6c757d !important; }
+.bg-moroso { background-color: #dc3545 !important; }
+.bg-suspendido { background-color: #ffc107 !important; color: #000 !important; }
+.bg-vigente { background-color: #28a745 !important; }
+.bg-renovado { background-color: #17a2b8 !important; }
+.bg-finalizado { background-color: #6c757d !important; }
+.bg-rescindido { background-color: #dc3545 !important; }
+</style>
+{% endblock %}

@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - UEB Acopio Bayamo{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/usuarios.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4" id="usuarios-index">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2>{{ title }}</h2>
+                    <p class="text-muted">Administración de usuarios del sistema de inventarios</p>
+                </div>
+                {% if can_manage %}
+                <div>
+                    <a href="{% url 'usuarios:crear' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Crear Usuario
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros y búsqueda -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <form method="GET" class="d-flex">
+                <input type="text" 
+                       name="search" 
+                       class="form-control me-2" 
+                       placeholder="Buscar usuarios..." 
+                       value="{{ search_query }}">
+                <button type="submit" class="btn btn-outline-primary">
+                    <i class="fas fa-search"></i>
+                </button>
+                {% if search_query %}
+                <a href="{% url 'usuarios:index' %}" class="btn btn-outline-secondary ms-2">
+                    <i class="fas fa-times"></i>
+                </a>
+                {% endif %}
+            </form>
+        </div>
+        <div class="col-md-6 text-end">
+            <small class="text-muted">
+                Total: {{ total_usuarios }} usuario{{ total_usuarios|pluralize }}
+            </small>
+        </div>
+    </div>
+
+    <!-- Lista de usuarios -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    {% if usuarios %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Usuario</th>
+                                    <th>Nombre Completo</th>
+                                    <th>Email</th>
+                                    <th>Estado</th>
+                                    <th>Fecha Registro</th>
+                                    <th>Último Acceso</th>
+                                    {% if can_manage %}
+                                    <th>Acciones</th>
+                                    {% endif %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for usuario in usuarios %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="user-avatar me-2">
+                                                {{ usuario.username|first|upper }}
+                                            </div>
+                                            <div>
+                                                <strong>{{ usuario.username }}</strong>
+                                                {% if usuario.is_staff %}
+                                                    <span class="badge bg-warning text-dark ms-1">Staff</span>
+                                                {% endif %}
+                                                {% if usuario.is_superuser %}
+                                                    <span class="badge bg-danger ms-1">Admin</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ usuario.get_full_name|default:"—" }}</td>
+                                    <td>{{ usuario.email|default:"—" }}</td>
+                                    <td>
+                                        <span class="status-badge {% if usuario.is_active %}status-active{% else %}status-inactive{% endif %}">
+                                            {% if usuario.is_active %}Activo{% else %}Inactivo{% endif %}
+                                        </span>
+                                    </td>
+                                    <td>{{ usuario.date_joined|date:"d/m/Y H:i" }}</td>
+                                    <td>{{ usuario.last_login|date:"d/m/Y H:i"|default:"Nunca" }}</td>
+                                    {% if can_manage %}
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'usuarios:detalle' usuario.pk %}" 
+                                               class="btn btn-sm btn-outline-primary" 
+                                               title="Ver detalles">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            
+                                            <a href="{% url 'usuarios:editar' usuario.pk %}" 
+                                               class="btn btn-sm btn-outline-secondary" 
+                                               title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            
+                                            {% if request.user.is_superuser and user != usuario %}
+                                            <button type="button" 
+                                                    class="btn btn-sm btn-toggle-status {% if usuario.is_active %}btn-outline-warning{% else %}btn-outline-success{% endif %}"
+                                                    onclick="toggleUserStatus({{ usuario.pk }}, '{{ usuario.username }}')"
+                                                    title="{% if usuario.is_active %}Desactivar{% else %}Activar{% endif %}">
+                                                <i class="fas {% if usuario.is_active %}fa-pause{% else %}fa-play{% endif %}"></i>
+                                            </button>
+                                            
+                                            <a href="{% url 'usuarios:eliminar' usuario.pk %}" 
+                                               class="btn btn-sm btn-outline-danger" 
+                                               title="Eliminar"
+                                               onclick="return confirm('¿Estás seguro de eliminar este usuario?')">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    {% endif %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginación -->
+                    {% if usuarios.has_other_pages %}
+                    <nav aria-label="Navegación de usuarios">
+                        <ul class="pagination justify-content-center">
+                            {% if usuarios.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}">Primero</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ usuarios.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Anterior</a>
+                                </li>
+                            {% endif %}
+                            
+                            <li class="page-item active">
+                                <span class="page-link">
+                                    Página {{ usuarios.number }} de {{ usuarios.paginator.num_pages }}
+                                </span>
+                            </li>
+                            
+                            {% if usuarios.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ usuarios.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Siguiente</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ usuarios.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}">Último</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                    
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                        <h5>No se encontraron usuarios</h5>
+                        {% if search_query %}
+                        <p class="text-muted">No hay usuarios que coincidan con "{{ search_query }}"</p>
+                        <a href="{% url 'usuarios:index' %}" class="btn btn-outline-primary">Ver todos los usuarios</a>
+                        {% else %}
+                        <p class="text-muted">Aún no hay usuarios registrados en el sistema</p>
+                        {% if can_manage %}
+                        <a href="{% url 'usuarios:crear' %}" class="btn btn-primary">Crear primer usuario</a>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botones de navegación -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver al Dashboard
+                </a>
+                
+                {% if request.user.is_authenticated %}
+                <a href="{% url 'usuarios:perfil' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-user"></i> Mi Perfil
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<script src="{% static 'js/usuarios.js' %}"></script>
+{% endblock %}

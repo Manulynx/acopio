@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Registrar Movimiento de Stock{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-section {
+        background: white;
+        border-radius: 10px;
+        padding: 25px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+    }
+
+    .form-section h5 {
+        color: #667eea;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+    }
+
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+    }
+
+    .stock-info {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .stock-info h6 {
+        color: #667eea;
+        margin-bottom: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="page-header">
+        <h1 class="mb-2">
+            <i class="fas fa-plus"></i> Registrar Movimiento de Stock
+        </h1>
+        <p class="mb-0 opacity-90">Registrar entrada, salida o ajuste de inventario</p>
+    </div>
+
+    <form method="post" id="movimientoForm">
+        {% csrf_token %}
+
+        <!-- Información del Movimiento -->
+        <div class="form-section">
+            <h5><i class="fas fa-exchange-alt"></i> Información del Movimiento</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="id_mercancia" class="form-label required-field">Mercancía</label>
+                        {{ form.mercancia }}
+                        {% if form.mercancia.errors %}
+                        <div class="text-danger small">{{ form.mercancia.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="id_tipo_movimiento" class="form-label required-field">Tipo de Movimiento</label>
+                        {{ form.tipo_movimiento }}
+                        {% if form.tipo_movimiento.errors %}
+                        <div class="text-danger small">{{ form.tipo_movimiento.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info de Stock Actual (se muestra dinámicamente) -->
+            <div id="stockInfo" class="stock-info" style="display: none;">
+                <h6><i class="fas fa-info-circle"></i> Información de Stock</h6>
+                <div class="row">
+                    <div class="col-md-4">
+                        <p class="mb-1"><strong>Stock Actual:</strong> <span id="stockActual">-</span></p>
+                    </div>
+                    <div class="col-md-4">
+                        <p class="mb-1"><strong>Precio Compra:</strong> $<span id="precioCompra">-</span></p>
+                    </div>
+                    <div class="col-md-4">
+                        <p class="mb-1"><strong>Precio Venta:</strong> $<span id="precioVenta">-</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="id_lote" class="form-label">Lote</label>
+                        {{ form.lote }}
+                        {% if form.lote.errors %}
+                        <div class="text-danger small">{{ form.lote.errors }}</div>
+                        {% endif %}
+                        <small class="form-text text-muted">Opcional - para mercancías con control de lotes</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="id_cantidad" class="form-label required-field">Cantidad</label>
+                        {{ form.cantidad }}
+                        {% if form.cantidad.errors %}
+                        <div class="text-danger small">{{ form.cantidad.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="id_fecha_movimiento" class="form-label">Fecha del Movimiento</label>
+                        {{ form.fecha_movimiento }}
+                        {% if form.fecha_movimiento.errors %}
+                        <div class="text-danger small">{{ form.fecha_movimiento.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="id_documento_referencia" class="form-label">Documento de Referencia</label>
+                        {{ form.documento_referencia }}
+                        {% if form.documento_referencia.errors %}
+                        <div class="text-danger small">{{ form.documento_referencia.errors }}</div>
+                        {% endif %}
+                        <small class="form-text text-muted">Número de factura, orden, etc.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detalles Adicionales -->
+        <div class="form-section">
+            <h5><i class="fas fa-clipboard"></i> Detalles Adicionales</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="id_razon" class="form-label">Razón del Movimiento</label>
+                        {{ form.razon }}
+                        {% if form.razon.errors %}
+                        <div class="text-danger small">{{ form.razon.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="id_usuario_responsable" class="form-label">Usuario Responsable</label>
+                        {{ form.usuario_responsable }}
+                        {% if form.usuario_responsable.errors %}
+                        <div class="text-danger small">{{ form.usuario_responsable.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="id_observaciones" class="form-label">Observaciones</label>
+                {{ form.observaciones }}
+                {% if form.observaciones.errors %}
+                <div class="text-danger small">{{ form.observaciones.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Resumen del Movimiento -->
+        <div class="form-section">
+            <h5><i class="fas fa-calculator"></i> Resumen del Movimiento</h5>
+            <div id="resumenMovimiento" class="alert alert-info">
+                <p class="mb-0">Complete los campos para ver el resumen del movimiento</p>
+            </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="d-flex gap-2 justify-content-end">
+            <a href="{% url 'mercancia:movimientos' %}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancelar
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Registrar Movimiento
+            </button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Cargar información de la mercancía seleccionada
+    const mercanciaSelect = document.getElementById('id_mercancia');
+    const stockInfo = document.getElementById('stockInfo');
+    const loteSelect = document.getElementById('id_lote');
+    const cantidadInput = document.getElementById('id_cantidad');
+    const tipoMovimientoSelect = document.getElementById('id_tipo_movimiento');
+    const resumenDiv = document.getElementById('resumenMovimiento');
+
+    mercanciaSelect.addEventListener('change', async function() {
+        const mercanciaId = this.value;
+        
+        if (!mercanciaId) {
+            stockInfo.style.display = 'none';
+            loteSelect.innerHTML = '<option value="">---------</option>';
+            return;
+        }
+
+        try {
+            // Cargar información de stock (en producción, hacer llamada AJAX real)
+            stockInfo.style.display = 'block';
+            
+            // Cargar lotes disponibles para esta mercancía
+            const response = await fetch(`/mercancia/api/lotes-mercancia/?mercancia=${mercanciaId}`);
+            if (response.ok) {
+                const data = await response.json();
+                loteSelect.innerHTML = '<option value="">---------</option>';
+                data.lotes.forEach(lote => {
+                    const option = document.createElement('option');
+                    option.value = lote.id;
+                    option.textContent = `${lote.numero_lote} - Stock: ${lote.cantidad_actual}`;
+                    loteSelect.appendChild(option);
+                });
+            }
+        } catch (error) {
+            console.error('Error al cargar información:', error);
+        }
+        
+        actualizarResumen();
+    });
+
+    // Actualizar resumen cuando cambian los valores
+    cantidadInput.addEventListener('input', actualizarResumen);
+    tipoMovimientoSelect.addEventListener('change', actualizarResumen);
+
+    function actualizarResumen() {
+        const mercancia = mercanciaSelect.options[mercanciaSelect.selectedIndex]?.text || '';
+        const tipo = tipoMovimientoSelect.options[tipoMovimientoSelect.selectedIndex]?.text || '';
+        const cantidad = parseFloat(cantidadInput.value) || 0;
+        
+        if (!mercancia || !tipo || cantidad <= 0) {
+            resumenDiv.innerHTML = '<p class="mb-0">Complete los campos para ver el resumen del movimiento</p>';
+            return;
+        }
+
+        const esEntrada = tipo.includes('Entrada') || tipo.includes('Positivo');
+        const signo = esEntrada ? '+' : '-';
+        const color = esEntrada ? 'success' : 'danger';
+        
+        resumenDiv.innerHTML = `
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <p class="mb-0"><strong>Mercancía:</strong> ${mercancia}</p>
+                    <p class="mb-0"><strong>Tipo:</strong> ${tipo}</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <h4 class="mb-0 text-${color}">${signo}${cantidad.toFixed(2)}</h4>
+                </div>
+            </div>
+        `;
+    }
+
+    // Establecer fecha actual por defecto
+    const fechaInput = document.getElementById('id_fecha_movimiento');
+    if (!fechaInput.value) {
+        const now = new Date();
+        const isoString = now.toISOString().slice(0, 16);
+        fechaInput.value = isoString;
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Iniciar Sesión - UEB Acopio Bayamo{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/usuarios.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="login-card">
+                    <div class="row g-0">
+                        <!-- Panel izquierdo con información -->
+                        <div class="col-lg-6">
+                            <div class="login-left">
+                                <div class="login-logo">
+                                    <i class="fas fa-warehouse"></i>
+                                </div>
+                                <h2 class="login-title">UEB Acopio Bayamo</h2>
+                                <p class="login-subtitle">Sistema de Gestión de Inventarios</p>
+                                
+                                <div class="features">
+                                    <div class="feature-item">
+                                        <i class="fas fa-check-circle feature-icon"></i>
+                                        <span>Control de productos naturales</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check-circle feature-icon"></i>
+                                        <span>Gestión de mercancías elaboradas</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check-circle feature-icon"></i>
+                                        <span>Reportes y estadísticas</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check-circle feature-icon"></i>
+                                        <span>Control de proveedores y clientes</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Panel derecho con formulario -->
+                        <div class="col-lg-6">
+                            <div class="login-right">
+                                <h3 class="mb-4">Iniciar Sesión</h3>
+                                
+                                <!-- Mensajes de error -->
+                                {% if messages %}
+                                    {% for message in messages %}
+                                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                            {{ message }}
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
+                                
+                                {% if form.errors %}
+                                    <div class="alert alert-danger">
+                                        <strong>Error en las credenciales:</strong>
+                                        <ul class="mb-0 mt-2">
+                                            {% for field, errors in form.errors.items %}
+                                                {% for error in errors %}
+                                                    <li>{{ error }}</li>
+                                                {% endfor %}
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
+                                
+                                <form method="post" id="login-form">
+                                    {% csrf_token %}
+                                    
+                                    <div class="form-floating mb-3">
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="id_username" 
+                                               name="username" 
+                                               placeholder="Usuario"
+                                               value="{{ form.username.value|default:'' }}"
+                                               required>
+                                        <label for="id_username">
+                                            <i class="fas fa-user me-2"></i>Usuario
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-floating mb-3">
+                                        <input type="password" 
+                                               class="form-control" 
+                                               id="id_password" 
+                                               name="password" 
+                                               placeholder="Contraseña"
+                                               required>
+                                        <label for="id_password">
+                                            <i class="fas fa-lock me-2"></i>Contraseña
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="remember_me" name="remember_me">
+                                        <label class="form-check-label" for="remember_me">
+                                            Recordar mi sesión
+                                        </label>
+                                    </div>
+                                    
+                                    <input type="hidden" name="next" value="{{ next }}">
+                                    
+                                    <button type="submit" class="btn btn-primary btn-login">
+                                        <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                                    </button>
+                                </form>
+                                
+                                <hr class="my-4">
+                                
+                                <div class="text-center">
+                                    <p class="text-muted mb-0">
+                                        <small>
+                                            <i class="fas fa-shield-alt me-1"></i>
+                                            Acceso seguro al sistema de inventarios
+                                        </small>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Font Awesome para iconos -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<script src="{% static 'js/usuarios.js' %}"></script>
+{% endblock %}

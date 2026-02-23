@@ -1,0 +1,388 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ mercancia.nombre }} - Detalle{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+    }
+
+    .info-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+        height: 100%;
+    }
+
+    .stat-box {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .stat-box h3 {
+        font-size: 2rem;
+        margin: 0;
+    }
+
+    .lote-item {
+        border-left: 4px solid #3b82f6;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 5px;
+        margin-bottom: 15px;
+    }
+
+    .badge-vencido { background-color: #dc3545; }
+    .badge-proximo { background-color: #ffc107; }
+    .badge-vigente { background-color: #28a745; }
+
+    .movement-item {
+        border-left: 3px solid #6c757d;
+        padding: 10px 15px;
+        margin-bottom: 10px;
+        background: white;
+        border-radius: 5px;
+    }
+
+    .movement-entrada { border-left-color: #28a745; }
+    .movement-salida { border-left-color: #dc3545; }
+    .movement-ajuste { border-left-color: #ffc107; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="page-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="mb-2">
+                    <i class="fas fa-box"></i> {{ mercancia.nombre }}
+                </h1>
+                <p class="mb-0 opacity-90">
+                    <i class="fas fa-barcode"></i> {{ mercancia.codigo }} | 
+                    <i class="fas fa-folder"></i> {{ mercancia.categoria.nombre }}
+                </p>
+            </div>
+            <div>
+                <a href="{% url 'mercancia:editar' mercancia.pk %}" class="btn btn-light me-2">
+                    <i class="fas fa-edit"></i> Editar
+                </a>
+                <a href="{% url 'mercancia:index' %}" class="btn btn-outline-light">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <h3>{{ mercancia.stock_actual|floatformat:2 }}</h3>
+                <p class="mb-0">Stock Actual</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-box" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <h3>{{ stats.total_lotes }}</h3>
+                <p class="mb-0">Lotes Activos</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-box" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <h3>{{ stats.total_movimientos }}</h3>
+                <p class="mb-0">Movimientos</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-box" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <h3>${{ mercancia.valor_inventario|floatformat:2 }}</h3>
+                <p class="mb-0">Valor Inventario</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Información General -->
+        <div class="col-md-6 mb-4">
+            <div class="info-card">
+                <h5 class="mb-3"><i class="fas fa-info-circle"></i> Información General</h5>
+                <table class="table table-sm">
+                    <tr>
+                        <th width="40%">Código:</th>
+                        <td>{{ mercancia.codigo }}</td>
+                    </tr>
+                    <tr>
+                        <th>Nombre:</th>
+                        <td>{{ mercancia.nombre }}</td>
+                    </tr>
+                    <tr>
+                        <th>Categoría:</th>
+                        <td>{{ mercancia.categoria.nombre }}</td>
+                    </tr>
+                    <tr>
+                        <th>Descripción:</th>
+                        <td>{{ mercancia.descripcion|default:"N/A" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Estado:</th>
+                        <td>
+                            {% if mercancia.activo %}
+                            <span class="badge bg-success">Activo</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inactivo</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Visible en Venta:</th>
+                        <td>
+                            {% if mercancia.visible_venta %}
+                            <i class="fas fa-check text-success"></i> Sí
+                            {% else %}
+                            <i class="fas fa-times text-danger"></i> No
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Información de Precios -->
+        <div class="col-md-6 mb-4">
+            <div class="info-card">
+                <h5 class="mb-3"><i class="fas fa-dollar-sign"></i> Precios e Inventario</h5>
+                <table class="table table-sm">
+                    <tr>
+                        <th width="40%">Precio Compra:</th>
+                        <td class="text-primary">
+                            {% if mercancia.precio_compra %}
+                            ${{ mercancia.precio_compra|floatformat:2 }}
+                            {% else %}
+                            N/A
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Precio Venta:</th>
+                        <td class="text-success">
+                            {% if mercancia.precio_venta %}
+                            ${{ mercancia.precio_venta|floatformat:2 }}
+                            {% else %}
+                            N/A
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% if mercancia.margen_ganancia %}
+                    <tr>
+                        <th>Margen de Ganancia:</th>
+                        <td class="text-info">{{ mercancia.margen_ganancia|floatformat:2 }}%</td>
+                    </tr>
+                    {% endif %}
+                    <tr>
+                        <th>Stock Actual:</th>
+                        <td><strong>{{ mercancia.stock_actual|floatformat:2 }}</strong></td>
+                    </tr>
+                    <tr>
+                        <th>Valor Total Inventario:</th>
+                        <td class="text-primary"><strong>${{ mercancia.valor_inventario|floatformat:2 }}</strong></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Características -->
+        <div class="col-md-6 mb-4">
+            <div class="info-card">
+                <h5 class="mb-3"><i class="fas fa-cogs"></i> Características</h5>
+                <table class="table table-sm">
+                    {% if mercancia.peso_unitario %}
+                    <tr>
+                        <th width="50%">Peso Unitario:</th>
+                        <td>{{ mercancia.peso_unitario }} kg</td>
+                    </tr>
+                    {% endif %}
+                    {% if mercancia.volumen_unitario %}
+                    <tr>
+                        <th>Volumen Unitario:</th>
+                        <td>{{ mercancia.volumen_unitario }} L</td>
+                    </tr>
+                    {% endif %}
+                    <tr>
+                        <th>Requiere Vencimiento:</th>
+                        <td>
+                            {% if mercancia.requiere_vencimiento %}
+                            <i class="fas fa-check text-success"></i> Sí
+                            {% else %}
+                            <i class="fas fa-times text-danger"></i> No
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Requiere Lote:</th>
+                        <td>
+                            {% if mercancia.requiere_lote %}
+                            <i class="fas fa-check text-success"></i> Sí
+                            {% else %}
+                            <i class="fas fa-times text-danger"></i> No
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% if mercancia.dias_vida_util %}
+                    <tr>
+                        <th>Días de Vida Útil:</th>
+                        <td>{{ mercancia.dias_vida_util }} días</td>
+                    </tr>
+                    {% endif %}
+                    <tr>
+                        <th>Temp. Almacenamiento:</th>
+                        <td>{{ mercancia.get_temperatura_almacenamiento_display }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Metadatos -->
+        <div class="col-md-6 mb-4">
+            <div class="info-card">
+                <h5 class="mb-3"><i class="fas fa-clock"></i> Metadatos</h5>
+                <table class="table table-sm">
+                    <tr>
+                        <th width="50%">Fecha Creación:</th>
+                        <td>{{ mercancia.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Última Actualización:</th>
+                        <td>{{ mercancia.fecha_actualizacion|date:"d/m/Y H:i" }}</td>
+                    </tr>
+                    {% if mercancia.creado_por %}
+                    <tr>
+                        <th>Creado Por:</th>
+                        <td>{{ mercancia.creado_por.get_full_name|default:mercancia.creado_por.username }}</td>
+                    </tr>
+                    {% endif %}
+                    {% if mercancia.observaciones %}
+                    <tr>
+                        <th>Observaciones:</th>
+                        <td>{{ mercancia.observaciones }}</td>
+                    </tr>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lotes -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="info-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0"><i class="fas fa-layer-group"></i> Lotes Activos</h5>
+                    <a href="{% url 'mercancia:lote_crear' %}?mercancia={{ mercancia.pk }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus"></i> Nuevo Lote
+                    </a>
+                </div>
+
+                {% if lotes %}
+                <div class="row">
+                    {% for lote in lotes %}
+                    <div class="col-md-6 mb-3">
+                        <div class="lote-item">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="mb-0">Lote: {{ lote.numero_lote }}</h6>
+                                {% if lote.esta_vencido %}
+                                <span class="badge badge-vencido">Vencido</span>
+                                {% elif lote.proximo_a_vencer %}
+                                <span class="badge badge-proximo">Próx. Vencer</span>
+                                {% else %}
+                                <span class="badge badge-vigente">Vigente</span>
+                                {% endif %}
+                            </div>
+                            <p class="mb-1 text-muted small">
+                                <i class="fas fa-calendar"></i> Producción: {{ lote.fecha_produccion|date:"d/m/Y" }}
+                            </p>
+                            {% if lote.fecha_vencimiento %}
+                            <p class="mb-1 text-muted small">
+                                <i class="fas fa-calendar-times"></i> Vencimiento: {{ lote.fecha_vencimiento|date:"d/m/Y" }}
+                                {% if lote.dias_para_vencer %}
+                                ({{ lote.dias_para_vencer }} días)
+                                {% endif %}
+                            </p>
+                            {% endif %}
+                            <p class="mb-1">
+                                <i class="fas fa-boxes"></i> Cantidad: {{ lote.cantidad_actual|floatformat:2 }} / {{ lote.cantidad_inicial|floatformat:2 }}
+                            </p>
+                            {% if lote.costo_unitario %}
+                            <p class="mb-0">
+                                <i class="fas fa-dollar-sign"></i> Costo: ${{ lote.costo_unitario|floatformat:2 }}
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> No hay lotes registrados para esta mercancía.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Últimos Movimientos -->
+    <div class="row">
+        <div class="col-12">
+            <div class="info-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0"><i class="fas fa-exchange-alt"></i> Últimos Movimientos</h5>
+                    <a href="{% url 'mercancia:movimientos' %}?mercancia={{ mercancia.pk }}" class="btn btn-sm btn-primary">
+                        Ver Todos
+                    </a>
+                </div>
+
+                {% if movimientos %}
+                {% for movimiento in movimientos %}
+                <div class="movement-item movement-{{ movimiento.tipo_movimiento|lower }}">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <strong>{{ movimiento.get_tipo_movimiento_display }}</strong>
+                            <p class="mb-0 text-muted small">
+                                <i class="fas fa-calendar"></i> {{ movimiento.fecha_movimiento|date:"d/m/Y H:i" }}
+                            </p>
+                            {% if movimiento.razon %}
+                            <p class="mb-0 text-muted small">{{ movimiento.razon }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="text-end">
+                            <strong class="{% if 'ENTRADA' in movimiento.tipo_movimiento %}text-success{% else %}text-danger{% endif %}">
+                                {% if 'ENTRADA' in movimiento.tipo_movimiento %}+{% else %}-{% endif %}{{ movimiento.cantidad|floatformat:2 }}
+                            </strong>
+                            <p class="mb-0 text-muted small">Stock: {{ movimiento.stock_posterior|floatformat:2 }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> No hay movimientos registrados.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

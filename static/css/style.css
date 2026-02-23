@@ -1,0 +1,205 @@
+/* Estilos globales del proyecto (navbar, tipografías, footer, utilidades) */
+
+/* Importar fuentes elegantes */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* Reset ligero y tipografía */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size:16px;
+    font-weight: 400;
+    line-height: 1.6;
+    color:#212529;
+    background:#f8f9fa;
+    margin:0;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+}
+
+/* Títulos con tipografía elegante */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    line-height: 1.3;
+    margin-bottom: 0.5rem;
+}
+
+h1 { font-size: 2.5rem; font-weight: 700; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.75rem; }
+h4 { font-size: 1.5rem; }
+h5 { font-size: 1.25rem; }
+h6 { font-size: 1rem; }
+
+/* Contenedores y utilidades */
+.container, .container-fluid{max-width:1200px;padding-left:15px;padding-right:15px;margin:auto;}
+.mt-1{margin-top:.25rem} .mt-2{margin-top:.5rem} .mt-3{margin-top:1rem}
+.mb-1{margin-bottom:.25rem} .mb-2{margin-bottom:.5rem} .mb-3{margin-bottom:1rem}
+
+/* Navbar personalizado */
+.navbar-brand strong{letter-spacing:.5px}
+.navbar-nav .nav-link{font-weight:600;color:#fff;transition: all 0.3s ease;}
+.navbar-nav .nav-link:hover{color:#e9eefc}
+
+/* Avatares de usuario */
+.user-avatar {
+    transition: transform 0.2s ease;
+}
+.user-avatar:hover {
+    transform: scale(1.1);
+}
+
+.user-avatar-lg {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: bold;
+    color: white;
+    background: #667eea ;
+}
+
+.user-avatar-md {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: white;
+    background: #667eea ;
+}
+
+.user-avatar-sm {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: white;
+    background: #667eea ;
+}
+
+/* Estados de usuario */
+.user-status-active {
+    color: #198754;
+}
+
+.user-status-inactive {
+    color: #dc3545;
+}
+
+/* Footer global */
+footer{font-size:.9rem;background: linear-gradient(135deg, #212529 0%, #495057 100%);}
+footer p, footer h5{margin:0}
+
+/* Formularios (global) */
+.form-control:focus{box-shadow:0 0 0 .1rem rgba(13,110,253,.15);border-color:rgba(13,110,253,.6)}
+
+/* Botones globales */
+.btn{border-radius: 8px;font-weight: 500;transition: all 0.3s ease;}
+.btn-primary{background:#667eea; border:none}
+.btn-primary:hover{background:#0b5ed7; transform: translateY(-1px);}
+.btn-success{background:#198754; border:none}
+.btn-danger{background:#dc3545; border:none}
+.btn-warning{background:#ffc107; border:none;color:#212529}
+.btn-info{background:#0dcaf0; border:none}
+
+/* Cards mejoradas */
+.card{
+    border-radius:15px;
+    border:none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+.card-header{
+    background: #667eea ;
+    color: #667eea;
+    border-radius: 15px 15px 0 0 !important;
+    border: none;
+}
+
+/* Tables mejoradas */
+.table{
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.table thead th{
+    background: #667eea ;
+    color: white;
+    border: none;
+    font-weight: 600;
+}
+.table tbody tr{
+    transition: background-color 0.2s ease;
+}
+.table tbody tr:hover{
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+/* Mensajes */
+.alert{border-radius:10px;border:none}
+.alert-success{background: linear-gradient(135deg, rgba(25, 135, 84, 0.1) 0%, rgba(32, 201, 151, 0.1) 100%);color: #198754;}
+.alert-danger{background: linear-gradient(135deg, rgba(220, 53, 69, 0.1) 0%, rgba(231, 76, 60, 0.1) 100%);color: #dc3545;}
+.alert-warning{background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(243, 156, 18, 0.1) 100%);color: #856404;}
+.alert-info{background: linear-gradient(135deg, rgba(13, 202, 240, 0.1) 0%, rgba(23, 162, 184, 0.1) 100%);color: #0dcaf0;}
+
+/* Badges */
+.badge{
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+/* Imágenes responsivas */
+.img-fluid{max-width:100%;height:auto}
+
+/* Helpers */
+.text-muted{color:#6c757d}
+.text-gradient{
+    background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+    
+    .table-responsive {
+        border-radius: 10px;
+    }
+}

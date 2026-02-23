@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contrato {{ contrato.numero_contrato }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="fas fa-file-contract"></i> Contrato {{ contrato.numero_contrato }}</h2>
+                <div>
+                    <a href="{% url 'arrendatarios:contrato_index' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </a>
+                    {% if contrato.estado in 'VIGENTE,RENOVADO' %}
+                    <a href="{% url 'arrendatarios:contrato_editar' contrato.pk %}" class="btn btn-warning">
+                        <i class="fas fa-edit"></i> Editar
+                    </a>
+                    <a href="{% url 'arrendatarios:contrato_finalizar' contrato.pk %}" class="btn btn-success">
+                        <i class="fas fa-check"></i> Finalizar
+                    </a>
+                    <a href="{% url 'arrendatarios:contrato_rescindir' contrato.pk %}" class="btn btn-danger">
+                        <i class="fas fa-ban"></i> Rescindir
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Información principal -->
+        <div class="col-md-8">
+            <!-- Información del contrato -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-file-alt"></i> Información del Contrato</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Número de Contrato:</strong> {{ contrato.numero_contrato }}</p>
+                            <p><strong>Estado:</strong> 
+                                <span class="badge bg-{{ contrato.estado|lower }}">{{ contrato.get_estado_display }}</span>
+                            </p>
+                            {% if contrato.esta_por_vencer %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i> Este contrato está por vencer en {{ contrato.dias_para_vencer }} días
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Duración:</strong> {{ contrato.duracion_meses }} meses</p>
+                            <p><strong>Día de Pago:</strong> {{ contrato.dia_pago }} de cada mes</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Partes del contrato -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-users"></i> Partes del Contrato</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><strong>Arrendatario</strong></h6>
+                            <p>
+                                <a href="{% url 'arrendatarios:detalle' contrato.arrendatario.pk %}">
+                                    {{ contrato.arrendatario.nombre_completo }}
+                                </a>
+                            </p>
+                            <p><strong>Identificación:</strong> {{ contrato.arrendatario.identificacion }}</p>
+                            {% if contrato.arrendatario.telefono %}
+                            <p><i class="fas fa-phone"></i> {{ contrato.arrendatario.telefono }}</p>
+                            {% endif %}
+                            {% if contrato.arrendatario.email %}
+                            <p><i class="fas fa-envelope"></i> {{ contrato.arrendatario.email }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <h6><strong>Inmueble</strong></h6>
+                            <p>
+                                <a href="{% url 'inmuebles:detalle' contrato.inmueble.pk %}">
+                                    {{ contrato.inmueble.nombre }}
+                                </a>
+                            </p>
+                            <p><strong>Código:</strong> {{ contrato.inmueble.codigo }}</p>
+                            <p><i class="fas fa-map-marker-alt"></i> {{ contrato.inmueble.direccion }}</p>
+                            <p><i class="fas fa-city"></i> {{ contrato.inmueble.ciudad }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fechas -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-calendar-alt"></i> Fechas del Contrato</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <p><strong>Fecha de Inicio:</strong><br>{{ contrato.fecha_inicio|date:"d/m/Y" }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <p><strong>Fecha de Fin:</strong><br>{{ contrato.fecha_fin|date:"d/m/Y" }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            {% if contrato.fecha_renovacion %}
+                            <p><strong>Fecha de Renovación:</strong><br>{{ contrato.fecha_renovacion|date:"d/m/Y" }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if contrato.dias_transcurridos %}
+                    <div class="progress mt-3">
+                        <div class="progress-bar" role="progressbar" 
+                             style="width: {{ contrato.porcentaje_transcurrido }}%;" 
+                             aria-valuenow="{{ contrato.porcentaje_transcurrido }}" 
+                             aria-valuemin="0" aria-valuemax="100">
+                            {{ contrato.porcentaje_transcurrido|floatformat:0 }}% transcurrido
+                        </div>
+                    </div>
+                    <p class="mt-2 text-muted">
+                        <small>Días transcurridos: {{ contrato.dias_transcurridos }} / {{ contrato.duracion_dias }}</small>
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Valores económicos -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-dollar-sign"></i> Valores Económicos</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <p><strong>Valor Arriendo:</strong><br>
+                                <span class="h4 text-primary">${{ contrato.valor_arriendo|floatformat:0 }}</span>
+                            </p>
+                        </div>
+                        <div class="col-md-4">
+                            {% if contrato.valor_administracion %}
+                            <p><strong>Administración:</strong><br>
+                                <span class="h5">${{ contrato.valor_administracion|floatformat:0 }}</span>
+                            </p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            {% if contrato.valor_deposito %}
+                            <p><strong>Depósito:</strong><br>
+                                <span class="h5">${{ contrato.valor_deposito|floatformat:0 }}</span>
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if contrato.incremento_anual %}
+                    <hr>
+                    <p><strong>Incremento Anual:</strong> {{ contrato.incremento_anual }}%</p>
+                    {% endif %}
+                    {% if contrato.valor_total_mensual %}
+                    <hr>
+                    <p><strong>Total Mensual:</strong> 
+                        <span class="h4 text-success">${{ contrato.valor_total_mensual|floatformat:0 }}</span>
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Documento del contrato -->
+            {% if contrato.documento_contrato %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-file-pdf"></i> Documento del Contrato</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{{ contrato.documento_contrato.url }}" target="_blank" class="btn btn-primary">
+                        <i class="fas fa-download"></i> Descargar Contrato
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Observaciones -->
+            {% if contrato.observaciones %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-comment-alt"></i> Observaciones</h5>
+                </div>
+                <div class="card-body">
+                    <p>{{ contrato.observaciones }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Panel lateral -->
+        <div class="col-md-4">
+            <!-- Resumen -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Resumen</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Estado:</strong> 
+                        <span class="badge bg-{{ contrato.estado|lower }}">{{ contrato.get_estado_display }}</span>
+                    </p>
+                    {% if contrato.esta_vigente %}
+                    <p class="text-success"><i class="fas fa-check-circle"></i> Contrato vigente</p>
+                    {% endif %}
+                    {% if contrato.esta_vencido %}
+                    <p class="text-danger"><i class="fas fa-exclamation-circle"></i> Contrato vencido</p>
+                    {% endif %}
+                    {% if contrato.dias_para_vencer %}
+                    <p><strong>Días para vencer:</strong> {{ contrato.dias_para_vencer }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Acciones rápidas -->
+            {% if contrato.estado in 'VIGENTE,RENOVADO' %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-bolt"></i> Acciones Rápidas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'arrendatarios:contrato_finalizar' contrato.pk %}" class="btn btn-success">
+                            <i class="fas fa-check"></i> Finalizar Contrato
+                        </a>
+                        <a href="{% url 'arrendatarios:contrato_rescindir' contrato.pk %}" class="btn btn-danger">
+                            <i class="fas fa-ban"></i> Rescindir Contrato
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Información de registro -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-clock"></i> Información de Registro</h5>
+                </div>
+                <div class="card-body">
+                    <p><small><strong>Creado por:</strong> {{ contrato.creado_por.get_full_name|default:contrato.creado_por.username }}</small></p>
+                    <p><small><strong>Fecha de creación:</strong> {{ contrato.fecha_creacion|date:"d/m/Y H:i" }}</small></p>
+                    <p><small><strong>Última actualización:</strong> {{ contrato.fecha_actualizacion|date:"d/m/Y H:i" }}</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.bg-vigente { background-color: #28a745 !important; }
+.bg-renovado { background-color: #17a2b8 !important; }
+.bg-finalizado { background-color: #6c757d !important; }
+.bg-rescindido { background-color: #dc3545 !important; }
+.bg-vencido { background-color: #fd7e14 !important; }
+</style>
+{% endblock %}

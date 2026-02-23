@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Movimientos de Stock{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+    }
+
+    .movement-item {
+        border-left: 4px solid #6c757d;
+        padding: 15px;
+        margin-bottom: 15px;
+        background: white;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+
+    .movement-item:hover {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transform: translateX(5px);
+    }
+
+    .movement-ENTRADA { border-left-color: #28a745; }
+    .movement-SALIDA { border-left-color: #dc3545; }
+    .movement-AJUSTE_POSITIVO { border-left-color: #17a2b8; }
+    .movement-AJUSTE_NEGATIVO { border-left-color: #ffc107; }
+    .movement-TRANSFERENCIA_ENTRADA { border-left-color: #6f42c1; }
+    .movement-TRANSFERENCIA_SALIDA { border-left-color: #e83e8c; }
+    .movement-MERMA { border-left-color: #fd7e14; }
+    .movement-VENCIMIENTO { border-left-color: #dc3545; }
+
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .stat-card h3 {
+        font-size: 2rem;
+        margin: 0;
+    }
+
+    .filter-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="page-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="mb-2">
+                    <i class="fas fa-exchange-alt"></i> Movimientos de Stock
+                </h1>
+                <p class="mb-0 opacity-90">Historial completo de entradas y salidas de mercancías</p>
+            </div>
+            <a href="{% url 'mercancia:movimiento_crear' %}" class="btn btn-light btn-lg">
+                <i class="fas fa-plus"></i> Nuevo Movimiento
+            </a>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <h3>{{ stats.total }}</h3>
+                <p class="mb-0">Total Movimientos</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #28a745 0%, #218838 100%);">
+                <h3>{{ stats.entradas }}</h3>
+                <p class="mb-0">Entradas</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);">
+                <h3>{{ stats.salidas }}</h3>
+                <p class="mb-0">Salidas</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);">
+                <h3>{{ stats.ajustes }}</h3>
+                <p class="mb-0">Ajustes</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filter-card">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label"><i class="fas fa-box"></i> Mercancía</label>
+                <select name="mercancia" class="form-select">
+                    <option value="">Todas</option>
+                    {% for m in mercancias %}
+                    <option value="{{ m.id }}" {% if request.GET.mercancia == m.id|stringformat:"s" %}selected{% endif %}>
+                        {{ m.nombre }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label"><i class="fas fa-flag"></i> Tipo</label>
+                <select name="tipo" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="ENTRADA" {% if request.GET.tipo == 'ENTRADA' %}selected{% endif %}>Entrada</option>
+                    <option value="SALIDA" {% if request.GET.tipo == 'SALIDA' %}selected{% endif %}>Salida</option>
+                    <option value="AJUSTE_POSITIVO" {% if request.GET.tipo == 'AJUSTE_POSITIVO' %}selected{% endif %}>Ajuste +</option>
+                    <option value="AJUSTE_NEGATIVO" {% if request.GET.tipo == 'AJUSTE_NEGATIVO' %}selected{% endif %}>Ajuste -</option>
+                    <option value="MERMA" {% if request.GET.tipo == 'MERMA' %}selected{% endif %}>Merma</option>
+                    <option value="VENCIMIENTO" {% if request.GET.tipo == 'VENCIMIENTO' %}selected{% endif %}>Vencimiento</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label"><i class="fas fa-calendar"></i> Desde</label>
+                <input type="date" name="fecha_desde" class="form-control" value="{{ request.GET.fecha_desde }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label"><i class="fas fa-calendar"></i> Hasta</label>
+                <input type="date" name="fecha_hasta" class="form-control" value="{{ request.GET.fecha_hasta }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label"><i class="fas fa-user"></i> Usuario</label>
+                <select name="usuario" class="form-select">
+                    <option value="">Todos</option>
+                    {% for u in usuarios %}
+                    <option value="{{ u.id }}" {% if request.GET.usuario == u.id|stringformat:"s" %}selected{% endif %}>
+                        {{ u.get_full_name|default:u.username }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-filter"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Lista de Movimientos -->
+    <div class="row">
+        <div class="col-12">
+            {% for movimiento in movimientos %}
+            <div class="movement-item movement-{{ movimiento.tipo_movimiento }}">
+                <div class="row align-items-center">
+                    <div class="col-md-3">
+                        <h6 class="mb-1">{{ movimiento.mercancia.nombre }}</h6>
+                        <small class="text-muted">{{ movimiento.mercancia.codigo }}</small>
+                        {% if movimiento.lote %}
+                        <br><small class="text-muted">Lote: {{ movimiento.lote.numero_lote }}</small>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-2">
+                        <span class="badge bg-{% if 'ENTRADA' in movimiento.tipo_movimiento %}success{% elif 'SALIDA' in movimiento.tipo_movimiento %}danger{% else %}info{% endif %}">
+                            {{ movimiento.get_tipo_movimiento_display }}
+                        </span>
+                    </div>
+                    <div class="col-md-2 text-center">
+                        <strong class="{% if 'ENTRADA' in movimiento.tipo_movimiento or 'POSITIVO' in movimiento.tipo_movimiento %}text-success{% else %}text-danger{% endif %}">
+                            {% if 'ENTRADA' in movimiento.tipo_movimiento or 'POSITIVO' in movimiento.tipo_movimiento %}+{% else %}-{% endif %}
+                            {{ movimiento.cantidad|floatformat:2 }}
+                        </strong>
+                    </div>
+                    <div class="col-md-2 text-center">
+                        <small class="text-muted d-block">Stock</small>
+                        <strong>{{ movimiento.stock_posterior|floatformat:2 }}</strong>
+                        <br>
+                        <small class="text-muted">(Ant: {{ movimiento.stock_anterior|floatformat:2 }})</small>
+                    </div>
+                    <div class="col-md-2">
+                        <small class="text-muted d-block">
+                            <i class="fas fa-calendar"></i> {{ movimiento.fecha_movimiento|date:"d/m/Y" }}
+                        </small>
+                        <small class="text-muted d-block">
+                            <i class="fas fa-clock"></i> {{ movimiento.fecha_movimiento|date:"H:i" }}
+                        </small>
+                        {% if movimiento.creado_por %}
+                        <small class="text-muted d-block">
+                            <i class="fas fa-user"></i> {{ movimiento.creado_por.get_full_name|default:movimiento.creado_por.username }}
+                        </small>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-1 text-end">
+                        <button class="btn btn-sm btn-outline-primary" type="button" 
+                                data-bs-toggle="collapse" data-bs-target="#detalle-{{ movimiento.id }}">
+                            <i class="fas fa-info-circle"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Detalles colapsables -->
+                <div class="collapse mt-3" id="detalle-{{ movimiento.id }}">
+                    <div class="card card-body bg-light">
+                        {% if movimiento.razon %}
+                        <p class="mb-1"><strong>Razón:</strong> {{ movimiento.razon }}</p>
+                        {% endif %}
+                        {% if movimiento.observaciones %}
+                        <p class="mb-1"><strong>Observaciones:</strong> {{ movimiento.observaciones }}</p>
+                        {% endif %}
+                        {% if movimiento.documento_referencia %}
+                        <p class="mb-1"><strong>Documento:</strong> {{ movimiento.documento_referencia }}</p>
+                        {% endif %}
+                        {% if movimiento.usuario_responsable %}
+                        <p class="mb-0"><strong>Responsable:</strong> {{ movimiento.usuario_responsable.get_full_name|default:movimiento.usuario_responsable.username }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="alert alert-info text-center">
+                <i class="fas fa-info-circle fa-2x mb-3"></i>
+                <h5>No se encontraron movimientos</h5>
+                <p>No hay movimientos registrados o que coincidan con los filtros aplicados.</p>
+                <a href="{% url 'mercancia:movimiento_crear' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Registrar Primer Movimiento
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Paginación -->
+    {% if movimientos.has_other_pages %}
+    <nav aria-label="Paginación" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if movimientos.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ movimientos.previous_page_number }}">Anterior</a>
+            </li>
+            {% endif %}
+
+            <li class="page-item active">
+                <span class="page-link">Página {{ movimientos.number }} de {{ movimientos.paginator.num_pages }}</span>
+            </li>
+
+            {% if movimientos.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ movimientos.next_page_number }}">Siguiente</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

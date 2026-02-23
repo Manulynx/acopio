@@ -1,0 +1,350 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-section {
+        border-left: 4px solid #007bff;
+        padding-left: 15px;
+        margin-bottom: 2rem;
+    }
+    .form-section h5 {
+        color: #007bff;
+        margin-bottom: 1rem;
+    }
+    .required-field {
+        color: #dc3545;
+    }
+    .form-help {
+        font-size: 0.875em;
+        color: #6c757d;
+    }
+    .checkbox-wrapper {
+        background: #f8f9fa;
+        border-radius: 0.375rem;
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">{{ title }}</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'productos:index' %}">Productos</a></li>
+                    <li class="breadcrumb-item active">{{ action }}</li>
+                </ol>
+            </nav>
+        </div>
+        <div>
+            <a href="{% url 'productos:index' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-{% if action == 'Crear' %}plus{% else %}edit{% endif %}"></i>
+                        {{ action }} Producto
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <h6><i class="fas fa-exclamation-triangle"></i> Error en el formulario:</h6>
+                            {% for field, errors in form.errors.items %}
+                                {% for error in errors %}
+                                    <div>{{ field }}: {{ error }}</div>
+                                {% endfor %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Información básica -->
+                        <div class="form-section">
+                            <h5><i class="fas fa-info-circle"></i> Información Básica</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.codigo.id_for_label }}" class="form-label">
+                                            Código del Producto
+                                            <span class="form-help">(*)</span>
+                                        </label>
+                                        {{ form.codigo }}
+                                        
+                                    </div>
+                                </div>
+                                
+                            </div>
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="mb-3">
+                                        <label for="{{ form.nombre.id_for_label }}" class="form-label">
+                                            Nombre del Producto <span class="required-field">*</span>
+                                        </label>
+                                        {{ form.nombre }}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="{{ form.stock_actual.id_for_label }}" class="form-label">
+                                            Stock Actual
+                                        </label>
+                                        {{ form.stock_actual }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="mb-3">
+                                        <label for="{{ form.descripcion.id_for_label }}" class="form-label">
+                                            Descripción
+                                        </label>
+                                        {{ form.descripcion }}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="{{ form.modelo.id_for_label }}" class="form-label">
+                                            Modelo
+                                        </label>
+                                        {{ form.modelo }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Clasificación -->
+                        <div class="form-section">
+                            <h5><i class="fas fa-tags"></i> Clasificación</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.categoria.id_for_label }}" class="form-label">
+                                            Categoría <span class="required-field">*</span>
+                                        </label>
+                                        {{ form.categoria }}
+                                        <div class="form-text">
+                                            <a href="{% url 'productos:categoria_crear' %}" target="_blank">
+                                                <i class="fas fa-plus"></i> Crear nueva categoría
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.peso_unitario.id_for_label }}" class="form-label">
+                                            Peso Unitario (kg)
+                                        </label>
+                                        {{ form.peso_unitario }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.volumen_unitario.id_for_label }}" class="form-label">
+                                            Volumen Unitario (litros)
+                                        </label>
+                                        {{ form.volumen_unitario }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.temperatura_almacenamiento.id_for_label }}" class="form-label">
+                                            Temperatura de Almacenamiento
+                                        </label>
+                                        {{ form.temperatura_almacenamiento }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Precios -->
+                        <div class="form-section">
+                            <h5><i class="fas fa-dollar-sign"></i> Precios</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.precio_compra.id_for_label }}" class="form-label">
+                                            Precio de Compra
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            {{ form.precio_compra }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.precio_venta.id_for_label }}" class="form-label">
+                                            Precio de Venta
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            {{ form.precio_venta }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Control de Calidad -->
+                        <div class="form-section">
+                            <h5><i class="fas fa-shield-alt"></i> Control de Calidad y Vencimiento</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="checkbox-wrapper">
+                                        <div class="form-check">
+                                            {{ form.requiere_vencimiento }}
+                                            <label class="form-check-label" for="{{ form.requiere_vencimiento.id_for_label }}">
+                                                <strong>Requiere control de vencimiento</strong>
+                                            </label>
+                                        </div>
+                                        <small class="text-muted">El producto tiene fecha de vencimiento</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="checkbox-wrapper">
+                                        <div class="form-check">
+                                            {{ form.requiere_lote }}
+                                            <label class="form-check-label" for="{{ form.requiere_lote.id_for_label }}">
+                                                <strong>Requiere control por lotes</strong>
+                                            </label>
+                                        </div>
+                                        <small class="text-muted">El producto se maneja por lotes específicos</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.dias_vida_util.id_for_label }}" class="form-label">
+                                            Días de Vida Útil
+                                        </label>
+                                        {{ form.dias_vida_util }}
+                                        <div class="form-text">Días desde la fecha de producción</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Estado -->
+                        <div class="form-section">
+                            <h5><i class="fas fa-toggle-on"></i> Estado y Visibilidad</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="checkbox-wrapper">
+                                        <div class="form-check">
+                                            {{ form.activo }}
+                                            <label class="form-check-label" for="{{ form.activo.id_for_label }}">
+                                                <strong>Producto activo</strong>
+                                            </label>
+                                        </div>
+                                        <small class="text-muted">El producto está disponible en el sistema</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="checkbox-wrapper">
+                                        <div class="form-check">
+                                            {{ form.visible_venta }}
+                                            <label class="form-check-label" for="{{ form.visible_venta.id_for_label }}">
+                                                <strong>Visible para venta</strong>
+                                            </label>
+                                        </div>
+                                        <small class="text-muted">El producto aparece en listados de venta</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Observaciones -->
+                        <div class="form-section">
+                            <h5><i class="fas fa-sticky-note"></i> Observaciones</h5>
+                            <div class="mb-3">
+                                <label for="{{ form.observaciones.id_for_label }}" class="form-label">
+                                    Observaciones Adicionales
+                                </label>
+                                {{ form.observaciones }}
+                            </div>
+                        </div>
+
+                        <!-- Botones de acción -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'productos:index' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> {{ action }} Producto
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Validación del lado del cliente
+        const form = document.querySelector('form');
+        const requiereVencimiento = document.getElementById('{{ form.requiere_vencimiento.id_for_label }}');
+        const diasVidaUtil = document.getElementById('{{ form.dias_vida_util.id_for_label }}');
+        
+        // Mostrar/ocultar días de vida útil según requiere vencimiento
+        function toggleDiasVidaUtil() {
+            const diasGroup = diasVidaUtil.closest('.mb-3');
+            if (requiereVencimiento.checked) {
+                diasGroup.style.display = 'block';
+                diasVidaUtil.required = true;
+            } else {
+                diasGroup.style.display = 'none';
+                diasVidaUtil.required = false;
+                diasVidaUtil.value = '';
+            }
+        }
+        
+        requiereVencimiento.addEventListener('change', toggleDiasVidaUtil);
+        toggleDiasVidaUtil(); // Ejecutar al cargar
+        
+        // Validación de precios
+        const precioCompra = document.getElementById('{{ form.precio_compra.id_for_label }}');
+        const precioVenta = document.getElementById('{{ form.precio_venta.id_for_label }}');
+        
+        function validarPrecios() {
+            if (precioCompra.value && precioVenta.value) {
+                if (parseFloat(precioVenta.value) < parseFloat(precioCompra.value)) {
+                    precioVenta.setCustomValidity('El precio de venta no puede ser menor que el precio de compra');
+                } else {
+                    precioVenta.setCustomValidity('');
+                }
+            }
+        }
+        
+        precioCompra.addEventListener('input', validarPrecios);
+        precioVenta.addEventListener('input', validarPrecios);
+    });
+</script>
+{% endblock %}

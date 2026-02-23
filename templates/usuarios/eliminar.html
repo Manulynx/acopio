@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - UEB Acopio Bayamo{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/usuarios.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4" id="usuario-eliminar">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <!-- Header -->
+            <div class="text-center mb-4">
+                <h2 class="text-danger">{{ title }}</h2>
+                <p class="text-muted">Esta acción no se puede deshacer</p>
+            </div>
+
+            <!-- Zona de peligro -->
+            <div class="card danger-zone">
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-exclamation-triangle fa-3x text-danger"></i>
+                    </div>
+                    
+                    <h5 class="text-center text-danger mb-4">
+                        ¿Estás seguro de eliminar este usuario?
+                    </h5>
+                    
+                    <!-- Información del usuario -->
+                    <div class="user-info mb-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; font-weight: bold; margin-right: 1rem;">
+                                {{ usuario.username|first|upper }}
+                            </div>
+                            <div>
+                                <h6 class="mb-0">{{ usuario.username }}</h6>
+                                <small class="text-muted">{{ usuario.get_full_name|default:"Sin nombre completo" }}</small>
+                            </div>
+                        </div>
+                        
+                        <div class="row small">
+                            <div class="col-6">
+                                <strong>Email:</strong> {{ usuario.email|default:"No especificado" }}
+                            </div>
+                            <div class="col-6">
+                                <strong>Registro:</strong> {{ usuario.date_joined|date:"d/m/Y" }}
+                            </div>
+                            <div class="col-6 mt-2">
+                                <strong>Estado:</strong> 
+                                {% if usuario.is_active %}
+                                    <span class="text-success">Activo</span>
+                                {% else %}
+                                    <span class="text-danger">Inactivo</span>
+                                {% endif %}
+                            </div>
+                            <div class="col-6 mt-2">
+                                <strong>Último acceso:</strong> {{ usuario.last_login|date:"d/m/Y"|default:"Nunca" }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Advertencias -->
+                    <div class="alert alert-danger mb-4">
+                        <h6><i class="fas fa-exclamation-circle"></i> Consecuencias de eliminar este usuario:</h6>
+                        <ul class="mb-0">
+                            <li>Se perderá toda la información del usuario</li>
+                            <li>No podrá acceder más al sistema</li>
+                            <li>Los registros asociados quedarán sin usuario</li>
+                            <li><strong>Esta acción no se puede deshacer</strong></li>
+                        </ul>
+                    </div>
+
+                    <!-- Formulario de confirmación -->
+                    <form method="post" class="mb-3">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="confirm_username" class="form-label">
+                                Para confirmar, escribe el nombre de usuario: <strong>{{ usuario.username }}</strong>
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="confirm_username" 
+                                   name="confirm_username" 
+                                   placeholder="Escribe {{ usuario.username }}" 
+                                   required>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'usuarios:detalle' usuario.pk %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-danger" id="delete-btn" data-username="{{ usuario.username }}" disabled>
+                                <i class="fas fa-trash"></i> Eliminar Usuario
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Enlaces alternativos -->
+                    <div class="text-center">
+                        <small class="text-muted">
+                            ¿Solo quieres desactivar el usuario? 
+                            <a href="{% url 'usuarios:editar' usuario.pk %}" class="text-primary">Editar usuario</a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navegación -->
+            <div class="text-center mt-4">
+                <a href="{% url 'usuarios:index' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-users"></i> Volver a Lista de Usuarios
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<script src="{% static 'js/usuarios.js' %}"></script>
+{% endblock %}

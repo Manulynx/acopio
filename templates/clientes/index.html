@@ -1,0 +1,219 @@
+{% extends 'base.html' %} {% load static %} {% block title %}Gestión de
+Clientes{% endblock %} {% block content %}
+<div class="container-fluid">
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <h2><i class="fas fa-building"></i> Gestión de Clientes</h2>
+        <div>
+          <a
+            href="{% url 'clientes:tipos_index' %}"
+            class="btn btn-outline-primary me-2"
+          >
+            <i class="fas fa-list"></i> Tipos de Clientes
+          </a>
+          <a href="{% url 'clientes:crear' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Nuevo Cliente
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estadísticas -->
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="card bg-primary text-white">
+        <div class="card-body">
+          <h5 class="card-title">
+            <i class="fas fa-building"></i> Total Clientes
+          </h5>
+          <h2>{{ total_clientes }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card bg-success text-white">
+        <div class="card-body">
+          <h5 class="card-title">
+            <i class="fas fa-check-circle"></i> Activos
+          </h5>
+          <h2>{{ clientes_activos }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card bg-danger text-white">
+        <div class="card-body">
+          <h5 class="card-title">
+            <i class="fas fa-exclamation-triangle"></i> Morosos
+          </h5>
+          <h2>{{ clientes_morosos }}</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros de búsqueda -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <h5 class="mb-0"><i class="fas fa-filter"></i> Filtros de Búsqueda</h5>
+    </div>
+    <div class="card-body">
+      <form method="get" class="row g-3">
+        <div class="col-md-5">{{ form.buscar }}</div>
+        <div class="col-md-3">{{ form.tipo_cliente }}</div>
+        <div class="col-md-2">{{ form.estado }}</div>
+        <div class="col-md-2">{{ form.activo }}</div>
+        <div class="col-md-12">
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-search"></i> Buscar
+          </button>
+          <a href="{% url 'clientes:index' %}" class="btn btn-secondary">
+            <i class="fas fa-times"></i> Limpiar
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Lista de clientes -->
+  <div class="card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Razón Social / Nombre Comercial</th>
+              <th>Tipo</th>
+              <th>Identificación</th>
+              <th>Contacto</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for cliente in page_obj %}
+            <tr>
+              <td><strong>{{ cliente.codigo }}</strong></td>
+              <td>
+                <div><strong>{{ cliente.razon_social }}</strong></div>
+                {% if cliente.nombre_comercial %}
+                <small class="text-muted">{{ cliente.nombre_comercial }}</small>
+                {% endif %}
+              </td>
+              <td>
+                {% if cliente.tipo_cliente %}
+                <span class="badge bg-info"
+                  >{{ cliente.tipo_cliente.nombre }}</span
+                >
+                {% else %}
+                <span class="text-muted">-</span>
+                {% endif %}
+              </td>
+              <td>{{ cliente.identificacion }}</td>
+              <td>
+                {% if cliente.telefono_principal %}
+                <div>
+                  <i class="fas fa-phone"></i> {{ cliente.telefono_principal }}
+                </div>
+                {% endif %} {% if cliente.email %}
+                <div>
+                  <i class="fas fa-envelope"></i> {{ cliente.email|truncatechars:25 }}
+                </div>
+                {% endif %}
+              </td>
+              <td>
+                <span class="badge bg-{{ cliente.estado|lower }}">
+                  {{ cliente.get_estado_display }}
+                </span>
+                {% if not cliente.activo %}
+                <br /><span class="badge bg-secondary mt-1">Inactivo</span>
+                {% endif %}
+              </td>
+              <td>
+                <a
+                  href="{% url 'clientes:detalle' cliente.pk %}"
+                  class="btn btn-sm btn-outline-primary"
+                  title="Ver Detalle"
+                >
+                  <i class="fas fa-eye"></i>
+                </a>
+                <a
+                  href="{% url 'clientes:editar' cliente.pk %}"
+                  class="btn btn-sm btn-outline-warning"
+                  title="Editar"
+                >
+                  <i class="fas fa-edit"></i>
+                </a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="7" class="text-center text-muted">
+                <i class="fas fa-info-circle"></i> No se encontraron clientes
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Paginación -->
+  {% if page_obj.has_other_pages %}
+  <nav aria-label="Paginación" class="mt-3">
+    <ul class="pagination justify-content-center">
+      {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page=1">Primera</a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.previous_page_number }}"
+          >Anterior</a
+        >
+      </li>
+      {% endif %}
+
+      <li class="page-item active">
+        <span class="page-link"
+          >Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages
+          }}</span
+        >
+      </li>
+
+      {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.next_page_number }}"
+          >Siguiente</a
+        >
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}"
+          >Última</a
+        >
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+</div>
+
+<style>
+  .bg-activo {
+    background-color: #28a745 !important;
+  }
+  .bg-inactivo {
+    background-color: #6c757d !important;
+  }
+  .bg-moroso {
+    background-color: #dc3545 !important;
+  }
+  .bg-suspendido {
+    background-color: #ffc107 !important;
+    color: #000 !important;
+  }
+</style>
+{% endblock %}
