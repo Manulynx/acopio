@@ -109,13 +109,17 @@ class CustomUserCreationForm(UserCreationForm):
 
     def clean_cedula(self):
         """Validar formato de cédula"""
-        cedula = self.cleaned_data.get('cedula')
-        if cedula and len(cedula) != 11:
+        cedula = self.cleaned_data.get('cedula') or None
+        if not cedula:
+            return None
+
+        if len(cedula) != 11:
             raise ValidationError("La cédula debe tener exactamente 11 dígitos")
-        if cedula and not cedula.isdigit():
+        if not cedula.isdigit():
             raise ValidationError("La cédula debe contener solo números")
-        if cedula and CustomUser.objects.filter(cedula=cedula).exists():
+        if CustomUser.objects.filter(cedula=cedula).exists():
             raise ValidationError("Ya existe un usuario con esta cédula")
+
         return cedula
 
     def clean_email(self):
@@ -131,7 +135,7 @@ class CustomUserCreationForm(UserCreationForm):
         user.email = self.cleaned_data['email']
         user.first_name = self.cleaned_data['first_name']
         user.last_name = self.cleaned_data['last_name']
-        user.cedula = self.cleaned_data.get('cedula')
+        user.cedula = self.cleaned_data.get('cedula') or None
         user.telefono = self.cleaned_data.get('telefono')
         user.cargo = self.cleaned_data.get('cargo')
         user.departamento = self.cleaned_data.get('departamento')
@@ -270,16 +274,18 @@ class CustomUserChangeForm(UserChangeForm):
 
     def clean_cedula(self):
         """Validar cédula sin conflictos"""
-        cedula = self.cleaned_data.get('cedula')
-        if cedula:
-            if len(cedula) != 11 or not cedula.isdigit():
-                raise ValidationError("La cédula debe tener exactamente 11 dígitos")
-            
-            # Verificar duplicados excluyendo el usuario actual
-            existing_user = CustomUser.objects.filter(cedula=cedula).exclude(pk=self.instance.pk)
-            if existing_user.exists():
-                raise ValidationError("Ya existe un usuario con esta cédula")
-        
+        cedula = self.cleaned_data.get('cedula') or None
+        if not cedula:
+            return None
+
+        if len(cedula) != 11 or not cedula.isdigit():
+            raise ValidationError("La cédula debe tener exactamente 11 dígitos")
+
+        # Verificar duplicados excluyendo el usuario actual
+        existing_user = CustomUser.objects.filter(cedula=cedula).exclude(pk=self.instance.pk)
+        if existing_user.exists():
+            raise ValidationError("Ya existe un usuario con esta cédula")
+
         return cedula
 
     def clean_email(self):
@@ -316,6 +322,9 @@ class CustomUserChangeForm(UserChangeForm):
         if password1:
             user.set_password(password1)
         
+        # Normalizar cédula vacía a None antes de guardar
+        user.cedula = self.cleaned_data.get('cedula') or None
+
         if commit:
             user.save()
             # Asegurar que existe perfil
