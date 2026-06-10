@@ -490,14 +490,40 @@ def proveedores_index(request):
 def proveedor_crear(request):
     """Crear nuevo proveedor"""
     if request.method == 'POST':
-        form = ProveedorForm(request.POST)
+        proveedor_id = request.POST.get('proveedor_id')
+        if proveedor_id:
+            proveedor_obj = get_object_or_404(Proveedor, pk=proveedor_id)
+            form = ProveedorForm(request.POST, instance=proveedor_obj)
+        else:
+            form = ProveedorForm(request.POST)
+
         if form.is_valid():
             proveedor = form.save(commit=False)
-            proveedor.creado_por = request.user
+            if not proveedor_id:
+                proveedor.creado_por = request.user
             proveedor.save()
-            
-            messages.success(request, f'Proveedor "{proveedor.nombre}" creado exitosamente.')
+
+            if proveedor_id:
+                messages.success(request, f'Proveedor "{proveedor.nombre}" actualizado exitosamente.')
+            else:
+                messages.success(request, f'Proveedor "{proveedor.nombre}" creado exitosamente.')
+
             return redirect('mercancia:proveedores')
     
     # Redirigir a la página de proveedores (se maneja con modal)
+    return redirect('mercancia:proveedores')
+
+
+@login_required
+def proveedor_eliminar(request, pk):
+    proveedor = get_object_or_404(Proveedor, pk=pk)
+    if not request.user.is_superuser:
+        messages.error(request, 'No tiene permisos para eliminar proveedores.')
+        return redirect('mercancia:proveedores')
+
+    if request.method == 'POST':
+        nombre = proveedor.nombre
+        proveedor.delete()
+        messages.success(request, f'Proveedor "{nombre}" eliminado.')
+
     return redirect('mercancia:proveedores')

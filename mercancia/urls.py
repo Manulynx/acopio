@@ -29,4 +29,5 @@ urlpatterns = [
     # URLs de proveedores
     path('proveedores/', views.proveedores_index, name='proveedores'),
     path('proveedores/crear/', views.proveedor_crear, name='proveedor_crear'),
+    path('proveedores/<int:pk>/eliminar/', views.proveedor_eliminar, name='proveedor_eliminar'),
 ]

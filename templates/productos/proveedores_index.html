@@ -124,7 +124,16 @@
     <div class="row">
         {% for proveedor in proveedores %}
         <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card proveedor-card">
+            <div class="card proveedor-card"
+                 data-proveedor-id="{{ proveedor.id }}"
+                 data-proveedor-codigo="{{ proveedor.codigo }}"
+                 data-proveedor-tipo="{{ proveedor.tipo }}"
+                 data-proveedor-nombre="{{ proveedor.nombre|escape }}"
+                 data-proveedor-identificacion="{{ proveedor.identificacion }}"
+                 data-proveedor-telefono="{{ proveedor.telefono }}"
+                 data-proveedor-email="{{ proveedor.email }}"
+                 data-proveedor-calificacion="{{ proveedor.calificacion }}"
+                 data-proveedor-activo="{% if proveedor.activo %}true{% else %}false{% endif %}">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div>
@@ -209,11 +218,19 @@
                         <i class="fas fa-clock"></i> Registrado: {{ proveedor.fecha_creacion|date:"d/m/Y" }}
                     </div>
 
-                    <div class="mt-3">
+                    <div class="mt-3 d-flex">
                         <button class="btn btn-sm btn-outline-primary" 
                                 onclick="editarProveedor({{ proveedor.id }})">
                             <i class="fas fa-edit"></i> Editar
                         </button>
+                        {% if request.user.is_superuser %}
+                        <form method="post" action="{% url 'productos:proveedor_eliminar' proveedor.id %}" style="display:inline; margin-left:8px;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar proveedor? Esta acción no es reversible.');">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </button>
+                        </form>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -347,17 +364,46 @@
 {% block extra_js %}
 <script>
     function editarProveedor(id) {
-        // En producción, cargar datos del proveedor vía AJAX
+        // Buscar el card con los datos y rellenar el modal
+        const card = document.querySelector('[data-proveedor-id="' + id + '"]');
+        if (!card) {
+            new bootstrap.Modal(document.getElementById('proveedorModal')).show();
+            return;
+        }
+
+        // Rellenar campos
+        document.getElementById('proveedor_id').value = card.getAttribute('data-proveedor-id') || '';
+        document.getElementById('codigo').value = card.getAttribute('data-proveedor-codigo') || '';
+        document.getElementById('tipo').value = card.getAttribute('data-proveedor-tipo') || 'EMPRESA';
+        document.getElementById('nombre').value = card.getAttribute('data-proveedor-nombre') || '';
+        document.getElementById('identificacion').value = card.getAttribute('data-proveedor-identificacion') || '';
+        document.getElementById('telefono').value = card.getAttribute('data-proveedor-telefono') || '';
+        document.getElementById('email').value = card.getAttribute('data-proveedor-email') || '';
+        document.getElementById('calificacion').value = card.getAttribute('data-proveedor-calificacion') || '5';
+        const activoVal = card.getAttribute('data-proveedor-activo');
+        document.getElementById('activo').checked = (activoVal === 'true');
+
+        // Cambiar título del modal
+        const modalTitle = document.querySelector('#proveedorModal .modal-title');
+        if (modalTitle) modalTitle.innerHTML = '<i class="fas fa-truck"></i> Editar Proveedor';
+
         new bootstrap.Modal(document.getElementById('proveedorModal')).show();
     }
 
-    // Auto-generar código de proveedor
-    document.getElementById('proveedorModal').addEventListener('show.bs.modal', function () {
+    // Auto-generar código de proveedor para creación
+    document.getElementById('proveedorModal').addEventListener('show.bs.modal', function (event) {
         const codigoInput = document.getElementById('codigo');
-        if (!codigoInput.value) {
-            const random = Math.floor(1000 + Math.random() * 9000);
-            codigoInput.value = 'PROV' + random;
+        const proveedorIdInput = document.getElementById('proveedor_id');
+        // Si no hay proveedor_id (crear), autogenerar código
+        if (!proveedorIdInput.value) {
+            if (!codigoInput.value) {
+                const random = Math.floor(1000 + Math.random() * 9000);
+                codigoInput.value = 'PROV' + random;
+            }
+            const modalTitle = document.querySelector('#proveedorModal .modal-title');
+            if (modalTitle) modalTitle.innerHTML = '<i class="fas fa-truck"></i> Nuevo Proveedor';
         }
     });
+</script>
 </script>
 {% endblock %}
